@@ -1,0 +1,4611 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>📦 DUR Ahafo Stores Management System</title>
+  
+  <!-- React & Dependencies -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <!-- Google APIs -->
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://accounts.google.com/gsi/client"></script>
+  
+  <style>
+    /* ============== BASE STYLES ============== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #333;
+    }
+    
+    /* ============== LAYOUT ============== */
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      overflow: hidden;
+      min-height: 90vh;
+    }
+    
+    /* ============== LOADING SCREEN ============== */
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      color: white;
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    }
+    
+    .loading-logo {
+      font-size: 80px;
+      animation: bounce 2s infinite;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #4ecdc4;
+      animation: spin 1s linear infinite;
+      margin: 20px 0;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ============== LOGIN SCREEN ============== */
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    }
+    
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+      animation: slideUp 0.5s ease;
+      border: 3px solid #4ecdc4;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .login-box h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #1a237e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 24px;
+    }
+    
+    /* ============== FORM CONTROLS ============== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #1a237e;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #c5cae9;
+      border-radius: 10px;
+      font-size: 16px;
+      transition: all 0.3s;
+      background: #f8f9fa;
+      color: #1a237e;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #4ecdc4;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    
+    .form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+    
+    /* ============== BUTTONS WITH ENHANCED SHADOWS ============== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(78, 205, 196, 0.5);
+    }
+    
+    .btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+    }
+    
+    .btn-logout {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-logout:hover {
+      box-shadow: 0 12px 25px rgba(255, 107, 107, 0.5);
+    }
+    
+    .btn-add {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
+    }
+    
+    .btn-add:hover {
+      box-shadow: 0 12px 25px rgba(46, 204, 113, 0.5);
+    }
+    
+    .btn-transaction {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-transaction:hover {
+      box-shadow: 0 12px 25px rgba(52, 152, 219, 0.5);
+    }
+    
+    .btn-delete {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      padding: 8px 16px;
+      font-size: 14px;
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    }
+    
+    .btn-delete:hover {
+      box-shadow: 0 12px 25px rgba(231, 76, 60, 0.5);
+    }
+    
+    .btn-edit {
+      background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+      color: #212529;
+      padding: 8px 16px;
+      font-size: 14px;
+      box-shadow: 0 6px 20px rgba(241, 196, 15, 0.3);
+    }
+    
+    .btn-edit:hover {
+      box-shadow: 0 12px 25px rgba(241, 196, 15, 0.5);
+    }
+    
+    .btn-export {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.3);
+    }
+    
+    .btn-export:hover {
+      box-shadow: 0 12px 25px rgba(155, 89, 182, 0.5);
+    }
+    
+    .btn-print {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+      box-shadow: 0 6px 20px rgba(230, 126, 34, 0.3);
+    }
+    
+    .btn-print:hover {
+      box-shadow: 0 12px 25px rgba(230, 126, 34, 0.5);
+    }
+    
+    .btn-save {
+      background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+      box-shadow: 0 6px 20px rgba(26, 188, 156, 0.3);
+    }
+    
+    .btn-save:hover {
+      box-shadow: 0 12px 25px rgba(26, 188, 156, 0.5);
+    }
+    
+    .btn-change-password {
+      background: linear-gradient(135deg, #7f8c8d 0%, #34495e 100%);
+      padding: 8px 16px;
+      font-size: 14px;
+      box-shadow: 0 6px 20px rgba(127, 140, 141, 0.3);
+    }
+    
+    .btn-change-password:hover {
+      box-shadow: 0 12px 25px rgba(127, 140, 141, 0.5);
+    }
+    
+    .btn-import {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-import:hover {
+      box-shadow: 0 12px 25px rgba(52, 152, 219, 0.5);
+    }
+    
+    .btn-download-template {
+      background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+      box-shadow: 0 6px 20px rgba(149, 165, 166, 0.3);
+    }
+    
+    .btn-download-template:hover {
+      box-shadow: 0 12px 25px rgba(149, 165, 166, 0.5);
+    }
+    
+    .btn-word {
+      background: linear-gradient(135deg, #185abd 0%, #0d47a1 100%);
+      box-shadow: 0 6px 20px rgba(24, 90, 189, 0.3);
+    }
+    
+    .btn-word:hover {
+      box-shadow: 0 12px 25px rgba(24, 90, 189, 0.5);
+    }
+    
+    .btn-filter {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+      padding: 8px 16px;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+    
+    .btn-filter:hover {
+      box-shadow: 0 8px 20px rgba(108, 117, 125, 0.5);
+      transform: translateY(-2px);
+    }
+    
+    .btn-filter.active {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+    }
+    
+    .google-btn {
+      background: linear-gradient(135deg, #4285f4 0%, #0d47a1 100%);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 20px rgba(66, 133, 244, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .google-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .google-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(66, 133, 244, 0.5);
+    }
+    
+    .google-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    /* ============== NAVIGATION ============== */
+    .navbar {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 4px solid #4ecdc4;
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-badge {
+      background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* ============== TAB AREA ============== */
+    .tab-area {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1b3a4b 100%);
+      padding: 10px 30px;
+      border-bottom: 3px solid #4ecdc4;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #e0e0e0;
+      border: 2px solid transparent;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .nav-btn:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      color: white;
+    }
+    
+    .nav-btn:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+    
+    .nav-btn.active {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.5);
+      transform: translateY(-2px);
+    }
+    
+    /* Individual tab colors */
+    .nav-btn.dashboard {
+      border-left: 4px solid #2ecc71;
+    }
+    
+    .nav-btn.dashboard.active {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+    }
+    
+    .nav-btn.products {
+      border-left: 4px solid #3498db;
+    }
+    
+    .nav-btn.products.active {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+    
+    .nav-btn.transactions {
+      border-left: 4px solid #9b59b6;
+    }
+    
+    .nav-btn.transactions.active {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    }
+    
+    .nav-btn.history {
+      border-left: 4px solid #e67e22;
+    }
+    
+    .nav-btn.history.active {
+      background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    }
+    
+    .nav-btn.reports {
+      border-left: 4px solid #e74c3c;
+    }
+    
+    .nav-btn.reports.active {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+    
+    .nav-btn.users {
+      border-left: 4px solid #f1c40f;
+    }
+    
+    .nav-btn.users.active {
+      background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+    }
+    
+    /* ============== CARDS ============== */
+    .card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin: 25px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      border: 1px solid #e0e0e0;
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+    }
+    
+    .card h3 {
+      color: #1a237e;
+      margin-bottom: 25px;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #e0e0e0;
+      font-weight: 700;
+    }
+    
+    /* ============== TABLES ============== */
+    .table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    th {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      padding: 18px;
+      text-align: left;
+      font-weight: 600;
+      color: white;
+      border-bottom: 3px solid #4ecdc4;
+      position: sticky;
+      top: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 14px;
+    }
+    
+    td {
+      padding: 16px;
+      border-bottom: 1px solid #e0e0e0;
+      vertical-align: middle;
+      color: #333;
+    }
+    
+    tr:hover {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      transform: scale(1.002);
+      transition: transform 0.2s;
+    }
+    
+    /* ============== STATUS BADGES ============== */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .status-ok {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      color: white;
+    }
+    
+    .status-low {
+      background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+      color: white;
+    }
+    
+    .status-out {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    /* ============== ALERTS ============== */
+    .alert {
+      padding: 18px 24px;
+      border-radius: 12px;
+      margin: 20px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      border: 2px solid transparent;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .alert-success {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+      border-color: #2ecc71;
+    }
+    
+    .alert-error {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      color: #721c24;
+      border-color: #e74c3c;
+    }
+    
+    .alert-warning {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      color: #856404;
+      border-color: #f1c40f;
+    }
+    
+    .alert-info {
+      background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+      color: #0c5460;
+      border-color: #3498db;
+    }
+    
+    .close-alert {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .close-alert:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.1);
+    }
+    
+    /* ============== STATS GRID ============== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+      margin-bottom: 35px;
+    }
+    
+    .stat-card {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .stat-icon {
+      font-size: 40px;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #4ecdc4, #2ecc71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-value {
+      font-size: 42px;
+      font-weight: 800;
+      margin: 15px 0;
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+    
+    /* ============== FILTER SECTIONS ============== */
+    .filter-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .quick-filters {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .quick-filter-btn {
+      background: white;
+      border: 2px solid #dee2e6;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .quick-filter-btn:hover {
+      border-color: #4ecdc4;
+      color: #4ecdc4;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.2);
+    }
+    
+    .quick-filter-btn.active {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      color: white;
+      border-color: #4ecdc4;
+      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.4);
+    }
+    
+    /* ============== MODALS ============== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 35px;
+      border-radius: 20px;
+      min-width: 500px;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+      animation: scaleIn 0.3s ease;
+      border: 3px solid #4ecdc4;
+      position: relative;
+    }
+    
+    .modal::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+    }
+    
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* ============== ACTION BUTTONS ============== */
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    /* ============== DATE SELECTION ============== */
+    .date-selection {
+      position: relative;
+    }
+    
+    .date-selection select {
+      appearance: none;
+      padding-right: 40px;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a237e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+    }
+    
+    .date-indicator {
+      position: absolute;
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .date-indicator.start {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      color: white;
+    }
+    
+    .date-indicator.end {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    .date-selected {
+      font-size: 12px;
+      margin-top: 5px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .date-selected.start {
+      background: rgba(46, 204, 113, 0.1);
+      color: #27ae60;
+    }
+    
+    .date-selected.end {
+      background: rgba(231, 76, 60, 0.1);
+      color: #c0392b;
+    }
+    
+    /* ============== INFO BOXES ============== */
+    .info-box {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 15px 0;
+      border-left: 5px solid #3498db;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    
+    .cost-info {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    }
+    
+    /* ============== REPORT CONTROLS ============== */
+    .report-controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    
+    .report-type-selector {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 25px;
+    }
+    
+    .report-type-btn {
+      padding: 14px 28px;
+      border: 2px solid #e0e0e0;
+      background: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .report-type-btn:hover {
+      border-color: #4ecdc4;
+      color: #4ecdc4;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.2);
+    }
+    
+    .report-type-btn.active {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      color: white;
+      border-color: #4ecdc4;
+      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.4);
+    }
+    
+    /* ============== IMPORT SECTION ============== */
+    .import-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border: 3px dashed #dee2e6;
+    }
+    
+    .import-dropzone {
+      padding: 50px;
+      text-align: center;
+      background: white;
+      border-radius: 12px;
+      border: 3px dashed #7f8c8d;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .import-dropzone:hover {
+      border-color: #4ecdc4;
+      background: #f8f9fa;
+      transform: translateY(-3px);
+    }
+    
+    .import-dropzone.dragover {
+      border-color: #2ecc71;
+      background: #e8f6f3;
+    }
+    
+    .import-preview {
+      margin-top: 25px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .import-preview table {
+      font-size: 13px;
+    }
+    
+    .import-preview th,
+    .import-preview td {
+      padding: 10px;
+    }
+    
+    /* ============== GOOGLE DRIVE SECTION ============== */
+    .google-drive-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 25px;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .google-status {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .google-status.connected {
+      border-color: #34a853;
+      background: rgba(52, 168, 83, 0.05);
+    }
+    
+    .google-status.disconnected {
+      border-color: #ea4335;
+      background: rgba(234, 67, 53, 0.05);
+    }
+    
+    .backup-controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .backup-history {
+      margin-top: 25px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    /* ============== PRINT STYLES ============== */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      
+      #print-section, #print-section * {
+        visibility: visible;
+      }
+      
+      #print-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+      }
+      
+      .no-print {
+        display: none !important;
+      }
+      
+      .print-only {
+        display: block !important;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      th, td {
+        border: 1px solid #000;
+        padding: 10px;
+      }
+      
+      .print-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 3px solid #000;
+        padding-bottom: 15px;
+      }
+      
+      .print-footer {
+        text-align: center;
+        margin-top: 30px;
+        border-top: 2px solid #000;
+        padding-top: 15px;
+      }
+    }
+    
+    .print-only {
+      display: none;
+    }
+    
+    /* ============== STORAGE STATUS ============== */
+    .storage-status {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin: 15px 30px;
+      border: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    .storage-bar {
+      flex: 1;
+      height: 12px;
+      background: #e9ecef;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 0 20px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .storage-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #2ecc71, #27ae60);
+      transition: width 0.3s ease-out;
+      border-radius: 6px;
+    }
+    
+    .storage-info {
+      font-size: 13px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+    
+    /* ============== RESPONSIVE ============== */
+    @media (max-width: 768px) {
+      .app-container {
+        border-radius: 15px;
+      }
+      
+      .navbar {
+        flex-direction: column;
+        gap: 20px;
+        padding: 20px;
+      }
+      
+      .user-info {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      
+      .tab-area {
+        padding: 10px 20px;
+      }
+      
+      .nav-buttons {
+        margin: 10px;
+        justify-content: center;
+      }
+      
+      .nav-btn {
+        padding: 10px 20px;
+        font-size: 13px;
+      }
+      
+      .card {
+        margin: 20px;
+        padding: 25px;
+      }
+      
+      .form-row {
+        flex-direction: column;
+      }
+      
+      .form-row .form-group {
+        min-width: 100%;
+      }
+      
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .modal {
+        min-width: 90%;
+        margin: 10px;
+        padding: 25px;
+      }
+    }
+    
+    /* ============== UTILITY CLASSES ============== */
+    .text-success { color: #2ecc71; }
+    .text-warning { color: #f1c40f; }
+    .text-danger { color: #e74c3c; }
+    .text-info { color: #3498db; }
+    .text-muted { color: #7f8c8d; }
+    
+    .mb-20 { margin-bottom: 20px; }
+    .mt-20 { margin-top: 20px; }
+    .ml-10 { margin-left: 10px; }
+    .mr-10 { margin-right: 10px; }
+    
+    /* ============== ANIMATIONS ============== */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    /* ============== GLOW EFFECTS ============== */
+    .glow {
+      box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+    }
+    
+    .glow-success {
+      box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
+    }
+    
+    .glow-warning {
+      box-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+    }
+    
+    .glow-danger {
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+    }
+    
+    /* ============== GRADIENT TEXT ============== */
+    .gradient-text {
+      background: linear-gradient(135deg, #4ecdc4, #2ecc71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* ============== REPORT FILTERS ============== */
+    .report-filters {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 2px solid #e0e0e0;
+    }
+    
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .status-filter-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    
+    .status-filter-btn {
+      padding: 8px 16px;
+      border: 2px solid #dee2e6;
+      background: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .status-filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .status-filter-btn.active {
+      color: white;
+    }
+    
+    .status-filter-btn.out-of-stock {
+      border-color: #e74c3c;
+    }
+    
+    .status-filter-btn.out-of-stock.active {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+      color: white;
+    }
+    
+    .status-filter-btn.low-stock {
+      border-color: #f1c40f;
+    }
+    
+    .status-filter-btn.low-stock.active {
+      background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+      color: white;
+    }
+    
+    .status-filter-btn.in-stock {
+      border-color: #2ecc71;
+    }
+    
+    .status-filter-btn.in-stock.active {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      color: white;
+    }
+    
+    /* ============== DASHBOARD TABLE IMPROVEMENTS ============== */
+    .dashboard-table-container {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    .dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .dashboard-table th {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      color: white;
+      border-bottom: 3px solid #4ecdc4;
+      position: sticky;
+      top: 0;
+    }
+    
+    .dashboard-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .dashboard-table tr:hover {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* ============== LOGIN STATUS INDICATORS ============== */
+    .login-status {
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .login-status.connecting {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    .login-status.connected {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .login-status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // ================= DATABASE SETUP =================
+    const db = new Dexie("StoresDB_V3");
+    
+    db.version(1).stores({
+      users: '++id,username,password,role,name',
+      products: '++id,name,unit,reorderLevel,currentUnitCost,createdAt,updatedAt',
+      movements: '++id,productId,type,quantity,date,reference,userId,unitCost,totalValue,importBatch',
+      settings: 'key',
+      backups: '++id,date,type,size,description,driveFileId,driveFileName',
+      syncState: 'key,lastSync,lastBackup'
+    });
+    
+    // ================= GOOGLE DRIVE INTEGRATION =================
+    const GoogleDriveManager = {
+      CLIENT_ID: '672283302745-js4344h9ghhq46mo7riiq799mpd3iaqs.apps.googleusercontent.com',
+      API_KEY: 'AIzaSyD1PhCfMdRuz-40rOJvxDMi5o1UDauNDy0',
+      SCOPES: 'https://www.googleapis.com/auth/drive.file',
+      
+      isInitialized: false,
+      isSignedIn: false,
+      
+      async init() {
+        return new Promise((resolve) => {
+          if (this.isInitialized) {
+            resolve(true);
+            return;
+          }
+          
+          try {
+            if (!window.gapi) {
+              console.error('Google API not loaded');
+              resolve(false);
+              return;
+            }
+            
+            gapi.load('client', async () => {
+              try {
+                await gapi.client.init({
+                  apiKey: this.API_KEY,
+                  discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
+                });
+                
+                if (!window.google || !window.google.accounts) {
+                  console.error('Google Identity Services not loaded');
+                  resolve(false);
+                  return;
+                }
+                
+                // Check for existing token
+                const token = localStorage.getItem('googleDriveToken');
+                if (token) {
+                  gapi.client.setToken(JSON.parse(token));
+                  this.isSignedIn = true;
+                }
+                
+                this.isInitialized = true;
+                resolve(true);
+              } catch (error) {
+                console.error('Google API initialization error:', error);
+                resolve(false);
+              }
+            });
+          } catch (error) {
+            console.error('Google Drive initialization error:', error);
+            resolve(false);
+          }
+        });
+      },
+      
+      async signIn() {
+        try {
+          return new Promise((resolve) => {
+            const tokenClient = google.accounts.oauth2.initTokenClient({
+              client_id: this.CLIENT_ID,
+              scope: this.SCOPES,
+              callback: (response) => {
+                if (response.access_token) {
+                  gapi.client.setToken(response);
+                  localStorage.setItem('googleDriveToken', JSON.stringify(response));
+                  this.isSignedIn = true;
+                  resolve(true);
+                } else {
+                  resolve(false);
+                }
+              },
+            });
+            
+            tokenClient.requestAccessToken({ prompt: 'consent' });
+          });
+        } catch (error) {
+          console.error('Sign in error:', error);
+          return false;
+        }
+      },
+      
+      signOut() {
+        const token = gapi.client.getToken();
+        if (token) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken(null);
+        }
+        localStorage.removeItem('googleDriveToken');
+        this.isSignedIn = false;
+      },
+      
+      async createBackup(data) {
+        try {
+          if (!this.isSignedIn) {
+            throw new Error('Not signed in to Google Drive');
+          }
+          
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+          const filename = `DUR_Stores_Backup_${timestamp}.json`;
+          
+          const backupData = {
+            app: 'DUR Ahafo Stores Management System',
+            version: '2.0',
+            timestamp: new Date().toISOString(),
+            data: data
+          };
+          
+          const fileContent = JSON.stringify(backupData, null, 2);
+          
+          const metadata = {
+            name: filename,
+            mimeType: 'application/json'
+          };
+          
+          const form = new FormData();
+          form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+          form.append('file', new Blob([fileContent], { type: 'application/json' }));
+          
+          const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${gapi.client.getToken().access_token}`
+            },
+            body: form
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Backup failed: ${response.statusText}`);
+          }
+          
+          const file = await response.json();
+          
+          await db.backups.add({
+            date: new Date().toISOString(),
+            type: 'manual',
+            size: fileContent.length,
+            description: `Backup to Google Drive: ${filename}`,
+            driveFileId: file.id,
+            driveFileName: file.name
+          });
+          
+          return {
+            success: true,
+            filename: file.name,
+            fileId: file.id
+          };
+        } catch (error) {
+          console.error('Backup error:', error);
+          return {
+            success: false,
+            error: error.message
+          };
+        }
+      },
+      
+      async listBackups() {
+        try {
+          if (!this.isSignedIn) {
+            return [];
+          }
+          
+          const response = await gapi.client.drive.files.list({
+            q: "name contains 'DUR_Stores_Backup_' and mimeType='application/json'",
+            orderBy: 'createdTime desc',
+            pageSize: 20
+          });
+          
+          return response.result.files || [];
+        } catch (error) {
+          console.error('Error listing backups:', error);
+          return [];
+        }
+      },
+      
+      async restoreBackup(fileId) {
+        try {
+          if (!this.isSignedIn) {
+            throw new Error('Not signed in to Google Drive');
+          }
+          
+          const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: {
+              'Authorization': `Bearer ${gapi.client.getToken().access_token}`
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to download backup: ${response.statusText}`);
+          }
+          
+          return await response.json();
+        } catch (error) {
+          console.error('Restore error:', error);
+          throw error;
+        }
+      },
+      
+      async syncData(remoteData) {
+        try {
+          // Merge products - keep latest
+          if (remoteData.products) {
+            for (const remoteProduct of remoteData.products) {
+              const localProduct = await db.products.get(remoteProduct.id);
+              
+              if (!localProduct) {
+                await db.products.add(remoteProduct);
+              } else {
+                const localDate = new Date(localProduct.updatedAt || localProduct.createdAt);
+                const remoteDate = new Date(remoteProduct.updatedAt || remoteProduct.createdAt);
+                
+                if (remoteDate > localDate) {
+                  await db.products.update(remoteProduct.id, remoteProduct);
+                }
+              }
+            }
+          }
+          
+          // Merge movements - add new ones only
+          if (remoteData.movements) {
+            const localMovementIds = new Set((await db.movements.toArray()).map(m => m.id));
+            const newMovements = remoteData.movements.filter(m => !localMovementIds.has(m.id));
+            
+            if (newMovements.length > 0) {
+              await db.movements.bulkAdd(newMovements);
+            }
+          }
+          
+          return { success: true, merged: newMovements?.length || 0 };
+        } catch (error) {
+          console.error('Sync merge error:', error);
+          return { success: false, error: error.message };
+        }
+      }
+    };
+    
+    // ================= HELPER FUNCTIONS =================
+    const helpers = {
+      getProductBalance: (productId, movements) => {
+        if (!movements || movements.length === 0) return 0;
+        return movements
+          .filter(m => m.productId === productId)
+          .reduce((total, m) => m.type === 'IN' ? total + m.quantity : total - m.quantity, 0);
+      },
+      
+      getProductStatus: (productId, products, movements) => {
+        const product = products.find(p => p.id === productId);
+        if (!product) return 'UNKNOWN';
+        
+        const balance = helpers.getProductBalance(productId, movements);
+        if (balance === 0) return 'OUT';
+        if (balance <= product.reorderLevel) return 'LOW';
+        return 'OK';
+      },
+      
+      formatCurrency: (amount) => {
+        return new Intl.NumberFormat('en-GH', {
+          style: 'currency',
+          currency: 'GHS'
+        }).format(amount);
+      },
+      
+      formatDate: (date) => {
+        return new Date(date).toLocaleDateString('en-GH', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      },
+      
+      formatDateShort: (date) => {
+        return new Date(date).toLocaleDateString('en-GH', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      },
+      
+      calculateProductCost: (productId, movements) => {
+        const productMovements = movements.filter(m => m.productId === productId);
+        const totalReceived = productMovements
+          .filter(m => m.type === 'IN')
+          .reduce((sum, m) => sum + (m.quantity * (m.unitCost || 0)), 0);
+        
+        const totalReceivedQuantity = productMovements
+          .filter(m => m.type === 'IN')
+          .reduce((sum, m) => sum + m.quantity, 0);
+        
+        const averageUnitCost = totalReceivedQuantity > 0 ? totalReceived / totalReceivedQuantity : 0;
+        const currentStock = helpers.getProductBalance(productId, movements);
+        const currentValue = currentStock * averageUnitCost;
+        
+        return {
+          totalCost: totalReceived,
+          averageUnitCost: averageUnitCost,
+          currentStock: currentStock,
+          currentValue: currentValue
+        };
+      },
+      
+      calculateStats: (products, movements) => {
+        const totalProducts = products.length;
+        const totalTransactions = movements.length;
+        
+        let lowStock = 0;
+        let outOfStock = 0;
+        let totalInventoryValue = 0;
+        
+        products.forEach(product => {
+          const stock = helpers.getProductBalance(product.id, movements);
+          const status = helpers.getProductStatus(product.id, products, movements);
+          const costData = helpers.calculateProductCost(product.id, movements);
+          
+          if (status === 'LOW') lowStock++;
+          if (status === 'OUT') outOfStock++;
+          
+          totalInventoryValue += costData.currentValue;
+        });
+        
+        return {
+          totalProducts,
+          totalTransactions,
+          lowStock,
+          outOfStock,
+          totalInventoryValue
+        };
+      },
+      
+      validatePassword: (password) => {
+        if (password.length < 6) {
+          return { valid: false, message: 'Password must be at least 6 characters' };
+        }
+        if (!/[A-Z]/.test(password)) {
+          return { valid: false, message: 'Password must contain at least one uppercase letter' };
+        }
+        if (!/[0-9]/.test(password)) {
+          return { valid: false, message: 'Password must contain at least one number' };
+        }
+        return { valid: true, message: 'Password is valid' };
+      },
+      
+      generateImportTemplate: () => {
+        const templateData = [
+          {
+            'Product Name': 'Laptop',
+            'Quantity': '10',
+            'Unit Cost (GH¢)': '800.00',
+            'Reference': 'PO-2024-001',
+            'Date': new Date().toISOString().split('T')[0]
+          },
+          {
+            'Product Name': 'Mouse',
+            'Quantity': '50',
+            'Unit Cost (GH¢)': '15.00',
+            'Reference': 'PO-2024-002',
+            'Date': new Date().toISOString().split('T')[0]
+          }
+        ];
+        
+        const worksheet = XLSX.utils.json_to_sheet(templateData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Import Template');
+        XLSX.writeFile(workbook, 'Stock_Import_Template.xlsx');
+      },
+      
+      exportToWord: (htmlContent, filename = 'Report') => {
+        const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${filename}</title><style>body { font-family: Arial, sans-serif; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; font-weight: bold; } .header { text-align: center; margin-bottom: 20px; } .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }</style></head><body>`;
+        const postHtml = `</body></html>`;
+        
+        const fullHtml = preHtml + htmlContent + postHtml;
+        
+        const blob = new Blob(['\ufeff', fullHtml], {
+          type: 'application/msword'
+        });
+        
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filename}_${new Date().toISOString().split('T')[0]}.doc`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      },
+      
+      generateReportHTML: (title, headers, data, filters = {}) => {
+        let html = `<div class="header">
+          <h1>${title}</h1>
+          <p>Generated: ${new Date().toLocaleString()}</p>`;
+        
+        if (filters.status) {
+          html += `<p>Filter: ${filters.status}</p>`;
+        }
+        if (filters.startDate && filters.endDate) {
+          html += `<p>Date Range: ${new Date(filters.startDate).toLocaleDateString()} to ${new Date(filters.endDate).toLocaleDateString()}</p>`;
+        }
+        
+        html += `</div>`;
+        
+        html += `<table>
+          <thead>
+            <tr>`;
+        
+        headers.forEach(header => {
+          html += `<th>${header}</th>`;
+        });
+        
+        html += `</tr>
+          </thead>
+          <tbody>`;
+        
+        data.forEach(row => {
+          html += `<tr>`;
+          row.forEach(cell => {
+            html += `<td>${cell}</td>`;
+          });
+          html += `</tr>`;
+        });
+        
+        html += `</tbody>
+        </table>
+        <div class="footer">
+          <p>DUR Ahafo Stores Management System - Confidential</p>
+          <p>Generated by: System Administrator</p>
+        </div>`;
+        
+        return html;
+      }
+    };
+    
+    // ================= INITIALIZE DATABASE =================
+    async function initializeDatabase() {
+      try {
+        // Open database
+        await db.open();
+        
+        // Check if users exist
+        let userCount = await db.users.count();
+        
+        if (userCount === 0) {
+          console.log("Creating default users...");
+          await db.users.bulkAdd([
+            { 
+              username: "storekeeper", 
+              password: "Store123", 
+              role: "STOREKEEPER", 
+              name: "Store Manager" 
+            },
+            { 
+              username: "supervisor", 
+              password: "Super123", 
+              role: "SUPERVISOR", 
+              name: "Supervisor" 
+            },
+            { 
+              username: "admin", 
+              password: "Admin123", 
+              role: "ADMIN", 
+              name: "Administrator" 
+            }
+          ]);
+          console.log("Default users created successfully");
+        }
+        
+        // Check if products exist
+        let productCount = await db.products.count();
+        if (productCount === 0) {
+          const now = new Date().toISOString();
+          await db.products.bulkAdd([
+            { 
+              name: "Laptop", 
+              unit: "Piece", 
+              reorderLevel: 5, 
+              currentUnitCost: 800, 
+              createdAt: now, 
+              updatedAt: now 
+            },
+            { 
+              name: "Mouse", 
+              unit: "Piece", 
+              reorderLevel: 20, 
+              currentUnitCost: 15, 
+              createdAt: now, 
+              updatedAt: now 
+            },
+            { 
+              name: "Keyboard", 
+              unit: "Piece", 
+              reorderLevel: 15, 
+              currentUnitCost: 45, 
+              createdAt: now, 
+              updatedAt: now 
+            },
+            { 
+              name: "Monitor", 
+              unit: "Piece", 
+              reorderLevel: 8, 
+              currentUnitCost: 200, 
+              createdAt: now, 
+              updatedAt: now 
+            }
+          ]);
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("Database initialization error:", error);
+        
+        // Try to delete and recreate database
+        try {
+          await db.delete();
+          await db.open();
+          return initializeDatabase();
+        } catch (retryError) {
+          console.error("Failed to recreate database:", retryError);
+          return false;
+        }
+      }
+    }
+    
+    // ================= BACKUP & SYNC COMPONENT =================
+    function BackupSync({ showAlert, onClose }) {
+      const [driveStatus, setDriveStatus] = React.useState({
+        initialized: false,
+        signedIn: false,
+        loading: false
+      });
+      const [backups, setBackups] = React.useState([]);
+      const [syncing, setSyncing] = React.useState(false);
+      
+      React.useEffect(() => {
+        initializeDrive();
+      }, []);
+      
+      const initializeDrive = async () => {
+        try {
+          setDriveStatus(prev => ({ ...prev, loading: true }));
+          const initialized = await GoogleDriveManager.init();
+          
+          setDriveStatus({
+            initialized,
+            signedIn: GoogleDriveManager.isSignedIn,
+            loading: false
+          });
+          
+          if (GoogleDriveManager.isSignedIn) {
+            loadBackups();
+          }
+        } catch (error) {
+          console.error('Drive initialization error:', error);
+          setDriveStatus({
+            initialized: false,
+            signedIn: false,
+            loading: false
+          });
+        }
+      };
+      
+      const handleSignIn = async () => {
+        try {
+          setDriveStatus(prev => ({ ...prev, loading: true }));
+          const success = await GoogleDriveManager.signIn();
+          
+          if (success) {
+            setDriveStatus({
+              initialized: true,
+              signedIn: true,
+              loading: false
+            });
+            showAlert('Successfully connected to Google Drive', 'success');
+            loadBackups();
+          } else {
+            setDriveStatus(prev => ({ ...prev, loading: false }));
+            showAlert('Failed to connect to Google Drive', 'error');
+          }
+        } catch (error) {
+          console.error('Sign in error:', error);
+          setDriveStatus(prev => ({ ...prev, loading: false }));
+          showAlert('Error connecting to Google Drive', 'error');
+        }
+      };
+      
+      const handleSignOut = () => {
+        GoogleDriveManager.signOut();
+        setDriveStatus({
+          initialized: true,
+          signedIn: false,
+          loading: false
+        });
+        setBackups([]);
+        showAlert('Disconnected from Google Drive', 'info');
+      };
+      
+      const loadBackups = async () => {
+        try {
+          const driveBackups = await GoogleDriveManager.listBackups();
+          setBackups(driveBackups);
+        } catch (error) {
+          console.error('Error loading backups:', error);
+        }
+      };
+      
+      const handleBackup = async () => {
+        try {
+          setDriveStatus(prev => ({ ...prev, loading: true }));
+          
+          const data = {
+            products: await db.products.toArray(),
+            movements: await db.movements.toArray(),
+            users: await db.users.toArray()
+          };
+          
+          const result = await GoogleDriveManager.createBackup(data);
+          
+          setDriveStatus(prev => ({ ...prev, loading: false }));
+          
+          if (result.success) {
+            showAlert(`Backup created successfully: ${result.filename}`, 'success');
+            loadBackups();
+          } else {
+            showAlert(`Backup failed: ${result.error}`, 'error');
+          }
+        } catch (error) {
+          console.error('Backup error:', error);
+          setDriveStatus(prev => ({ ...prev, loading: false }));
+          showAlert('Error creating backup', 'error');
+        }
+      };
+      
+      const handleSync = async () => {
+        try {
+          setSyncing(true);
+          
+          // Get latest backup
+          const driveBackups = await GoogleDriveManager.listBackups();
+          if (driveBackups.length === 0) {
+            showAlert('No backups found. Create a backup first.', 'warning');
+            setSyncing(false);
+            return;
+          }
+          
+          const latestBackup = driveBackups[0];
+          showAlert(`Syncing with latest backup: ${latestBackup.name}`, 'info');
+          
+          // Download backup
+          const backupData = await GoogleDriveManager.restoreBackup(latestBackup.id);
+          
+          if (!backupData || !backupData.data) {
+            showAlert('Invalid backup file format', 'error');
+            setSyncing(false);
+            return;
+          }
+          
+          // Sync data
+          const result = await GoogleDriveManager.syncData(backupData.data);
+          
+          if (result.success) {
+            showAlert(`Sync completed. Merged ${result.merged || 0} new records.`, 'success');
+            // Force reload of main app data
+            window.dispatchEvent(new CustomEvent('dataChanged'));
+          } else {
+            showAlert(`Sync failed: ${result.error}`, 'error');
+          }
+        } catch (error) {
+          console.error('Sync error:', error);
+          showAlert('Error synchronizing data', 'error');
+        } finally {
+          setSyncing(false);
+        }
+      };
+      
+      const handleRestore = async (fileId, filename) => {
+        if (!window.confirm(`Are you sure you want to restore from backup:\n${filename}?\n\nThis will replace all local data.`)) {
+          return;
+        }
+        
+        try {
+          setDriveStatus(prev => ({ ...prev, loading: true }));
+          
+          const backupData = await GoogleDriveManager.restoreBackup(fileId);
+          
+          if (!backupData || !backupData.data) {
+            throw new Error('Invalid backup file format');
+          }
+          
+          // Clear all data
+          await db.products.clear();
+          await db.movements.clear();
+          await db.users.clear();
+          await db.backups.clear();
+          
+          // Restore data
+          if (backupData.data.products) {
+            await db.products.bulkAdd(backupData.data.products);
+          }
+          
+          if (backupData.data.movements) {
+            await db.movements.bulkAdd(backupData.data.movements);
+          }
+          
+          if (backupData.data.users) {
+            await db.users.bulkAdd(backupData.data.users);
+          }
+          
+          setDriveStatus(prev => ({ ...prev, loading: false }));
+          
+          showAlert('Backup restored successfully! Page will reload...', 'success');
+          setTimeout(() => window.location.reload(), 2000);
+        } catch (error) {
+          console.error('Restore error:', error);
+          setDriveStatus(prev => ({ ...prev, loading: false }));
+          showAlert(`Restore failed: ${error.message}`, 'error');
+        }
+      };
+      
+      return (
+        <div className="google-drive-section">
+          <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>
+            <span style={{ 
+              background: 'linear-gradient(135deg, #4285f4, #34a853)', 
+              WebkitBackgroundClip: 'text', 
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}>☁️</span> Google Drive Backup & Sync
+          </h4>
+          
+          <div className={`google-status ${driveStatus.signedIn ? 'connected' : 'disconnected'}`}>
+            <div style={{ 
+              width: '12px', 
+              height: '12px', 
+              borderRadius: '50%',
+              background: driveStatus.signedIn ? '#34a853' : '#ea4335',
+              boxShadow: `0 0 10px ${driveStatus.signedIn ? '#34a853' : '#ea4335'}`
+            }}></div>
+            <div>
+              <strong>Status:</strong> {driveStatus.signedIn ? 'Connected to Google Drive' : 'Not Connected'}
+            </div>
+          </div>
+          
+          {!driveStatus.initialized || driveStatus.loading ? (
+            <div style={{ textAlign: 'center', padding: '20px' }}>
+              <div className="loading-spinner" style={{ width: '30px', height: '30px', margin: '0 auto' }}></div>
+              <p style={{ marginTop: '10px', color: '#666' }}>Initializing Google Drive...</p>
+            </div>
+          ) : !driveStatus.signedIn ? (
+            <div style={{ textAlign: 'center' }}>
+              <button 
+                className="google-btn"
+                onClick={handleSignIn}
+                disabled={driveStatus.loading}
+              >
+                <span>🔐</span> Sign in with Google
+              </button>
+              <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
+                Connect to Google Drive to enable automatic backups and synchronization across devices
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div className="backup-controls">
+                <button 
+                  className="btn btn-add"
+                  onClick={handleBackup}
+                  disabled={driveStatus.loading}
+                >
+                  <span>💾</span> Create Backup
+                </button>
+                
+                <button 
+                  className="btn btn-transaction"
+                  onClick={handleSync}
+                  disabled={syncing || driveStatus.loading}
+                >
+                  <span>🔄</span> {syncing ? 'Syncing...' : 'Sync Now'}
+                </button>
+                
+                <button 
+                  className="btn btn-export"
+                  onClick={loadBackups}
+                  disabled={driveStatus.loading}
+                >
+                  <span>🔄</span> Refresh Backups
+                </button>
+                
+                <button 
+                  className="btn btn-logout"
+                  onClick={handleSignOut}
+                  disabled={driveStatus.loading}
+                >
+                  <span>🚪</span> Sign Out
+                </button>
+              </div>
+              
+              {backups.length > 0 && (
+                <div className="backup-history">
+                  <h5 style={{ color: '#1a237e', marginBottom: '15px' }}>Available Backups:</h5>
+                  <div className="table-container">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Backup File</th>
+                          <th>Created</th>
+                          <th>Size</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {backups.slice(0, 10).map(backup => (
+                          <tr key={backup.id}>
+                            <td>{backup.name}</td>
+                            <td>{new Date(backup.createdTime).toLocaleString()}</td>
+                            <td>{backup.size ? `${(backup.size / 1024).toFixed(2)} KB` : 'Unknown'}</td>
+                            <td>
+                              <div className="action-buttons">
+                                <button 
+                                  onClick={() => handleRestore(backup.id, backup.name)}
+                                  className="btn btn-edit"
+                                  style={{ padding: '6px 12px', fontSize: '13px' }}
+                                >
+                                  <span>📥</span> Restore
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25px' }}>
+            <button 
+              onClick={onClose}
+              className="btn"
+              style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}
+            >
+              <span>↩️</span> Close
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= LOADING COMPONENT =================
+    function LoadingScreen() {
+      return (
+        <div className="loading-screen">
+          <div className="loading-logo">📦</div>
+          <h2 className="gradient-text" style={{ fontSize: '28px', marginBottom: '10px' }}>DUR Ahafo Stores Management System</h2>
+          <div className="loading-spinner"></div>
+          <p style={{ marginTop: '10px', fontSize: '14px', opacity: 0.7, color: '#e0e0e0' }}>
+            Initializing system...
+          </p>
+        </div>
+      );
+    }
+    
+    // ================= MAIN APP COMPONENT =================
+    function App() {
+      const [isLoading, setIsLoading] = React.useState(true);
+      const [user, setUser] = React.useState(null);
+      const [loginData, setLoginData] = React.useState({ username: '', password: '' });
+      const [activeView, setActiveView] = React.useState('dashboard');
+      const [products, setProducts] = React.useState([]);
+      const [movements, setMovements] = React.useState([]);
+      const [users, setUsers] = React.useState([]);
+      const [alert, setAlert] = React.useState({ show: false, message: '', type: '' });
+      const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+      const [productToDelete, setProductToDelete] = React.useState(null);
+      const [stats, setStats] = React.useState(null);
+      const [showChangePasswordModal, setShowChangePasswordModal] = React.useState(false);
+      const [changePasswordData, setChangePasswordData] = React.useState({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      const [showImportModal, setShowImportModal] = React.useState(false);
+      const [importData, setImportData] = React.useState([]);
+      const [importErrors, setImportErrors] = React.useState([]);
+      const [showBackupModal, setShowBackupModal] = React.useState(false);
+      const [lastSync, setLastSync] = React.useState(null);
+      const [driveStatus, setDriveStatus] = React.useState({
+        initialized: false,
+        signedIn: false,
+        loading: false,
+        message: ''
+      });
+      
+      React.useEffect(() => {
+        const initApp = async () => {
+          try {
+            console.log("Initializing app...");
+            await initializeDatabase();
+            
+            const [productList, movementList, userList] = await Promise.all([
+              db.products.toArray(),
+              db.movements.toArray(),
+              db.users.toArray()
+            ]);
+            
+            setProducts(productList);
+            setMovements(movementList);
+            setUsers(userList);
+            
+            const calculatedStats = helpers.calculateStats(productList, movementList);
+            setStats(calculatedStats);
+            
+            // Initialize Google Drive
+            setDriveStatus(prev => ({ ...prev, loading: true, message: 'Connecting to Google Drive...' }));
+            const driveInitialized = await GoogleDriveManager.init();
+            
+            setDriveStatus({
+              initialized: driveInitialized,
+              signedIn: GoogleDriveManager.isSignedIn,
+              loading: false,
+              message: driveInitialized ? 
+                (GoogleDriveManager.isSignedIn ? 'Connected to Google Drive' : 'Google Drive ready') : 
+                'Google Drive unavailable'
+            });
+            
+            setIsLoading(false);
+            console.log("App initialized successfully");
+          } catch (error) {
+            console.error("App initialization error:", error);
+            showAlert('Failed to initialize application', 'error');
+            setIsLoading(false);
+            setDriveStatus({
+              initialized: false,
+              signedIn: false,
+              loading: false,
+              message: 'Google Drive connection failed'
+            });
+          }
+        };
+        
+        initApp();
+        
+        // Listen for data change events (for sync)
+        const handleDataChange = () => {
+          loadData();
+        };
+        
+        window.addEventListener('dataChanged', handleDataChange);
+        
+        return () => {
+          window.removeEventListener('dataChanged', handleDataChange);
+        };
+      }, []);
+      
+      React.useEffect(() => {
+        if (products.length > 0 && movements.length > 0) {
+          const calculatedStats = helpers.calculateStats(products, movements);
+          setStats(calculatedStats);
+        }
+      }, [products, movements]);
+      
+      const showAlert = (message, type) => {
+        setAlert({ show: true, message, type });
+        setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
+      };
+      
+      const loadData = async () => {
+        try {
+          const [productList, movementList, userList] = await Promise.all([
+            db.products.toArray(),
+            db.movements.toArray(),
+            db.users.toArray()
+          ]);
+          
+          setProducts(productList);
+          setMovements(movementList);
+          setUsers(userList);
+        } catch (error) {
+          console.error("Error loading data:", error);
+          showAlert('Error loading data', 'error');
+        }
+      };
+      
+      const handleLogin = async (e) => {
+        e.preventDefault();
+        try {
+          console.log("Login attempt for:", loginData.username);
+          
+          // Get all users
+          const allUsers = await db.users.toArray();
+          console.log("Available users:", allUsers.map(u => u.username));
+          
+          // Find user
+          const foundUser = allUsers.find(u => u.username === loginData.username);
+          
+          if (!foundUser) {
+            showAlert('Invalid username or password', 'error');
+            return;
+          }
+          
+          if (foundUser.password !== loginData.password) {
+            showAlert('Invalid username or password', 'error');
+            return;
+          }
+          
+          setUser(foundUser);
+          showAlert(`Welcome back, ${foundUser.name}!`, 'success');
+          setActiveView('dashboard');
+        } catch (error) {
+          console.error("Login error:", error);
+          showAlert('Login failed. Please try again.', 'error');
+        }
+      };
+      
+      const logout = () => {
+        setUser(null);
+        setLoginData({ username: '', password: '' });
+        showAlert('Logged out successfully', 'success');
+      };
+      
+      const addProduct = async (product) => {
+        try {
+          if (!product.name || !product.unit) {
+            showAlert('Please fill all required fields', 'error');
+            return;
+          }
+          
+          const newProduct = {
+            name: product.name.trim(),
+            unit: product.unit.trim(),
+            reorderLevel: parseInt(product.reorderLevel) || 0,
+            currentUnitCost: parseFloat(product.currentUnitCost) || 0,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          await db.products.add(newProduct);
+          await loadData();
+          showAlert('Product added successfully', 'success');
+          
+          // Trigger data change for sync
+          window.dispatchEvent(new CustomEvent('dataChanged'));
+        } catch (error) {
+          console.error("Error adding product:", error);
+          showAlert('Error adding product', 'error');
+        }
+      };
+      
+      const updateProduct = async (id, updates) => {
+        try {
+          const now = new Date().toISOString();
+          await db.products.update(id, {
+            ...updates,
+            updatedAt: now
+          });
+          
+          await loadData();
+          showAlert('Product updated successfully', 'success');
+          
+          // Trigger data change for sync
+          window.dispatchEvent(new CustomEvent('dataChanged'));
+        } catch (error) {
+          console.error("Error updating product:", error);
+          showAlert('Error updating product', 'error');
+        }
+      };
+      
+      const deleteProduct = async (id) => {
+        try {
+          // Check if product has movements
+          const productMovements = await db.movements.where("productId").equals(id).count();
+          
+          if (productMovements > 0) {
+            showAlert('Cannot delete product with transaction history', 'error');
+            return;
+          }
+          
+          await db.products.delete(id);
+          await loadData();
+          showAlert('Product deleted successfully', 'success');
+          
+          // Trigger data change for sync
+          window.dispatchEvent(new CustomEvent('dataChanged'));
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          showAlert('Error deleting product', 'error');
+        }
+      };
+      
+      const addMovement = async (movement) => {
+        try {
+          if (!movement.productId || movement.quantity <= 0) {
+            showAlert('Please select product and enter valid quantity', 'error');
+            return;
+          }
+          
+          const product = products.find(p => p.id === movement.productId);
+          const currentStock = helpers.getProductBalance(movement.productId, movements);
+          
+          if (movement.type === 'OUT' && movement.quantity > currentStock) {
+            showAlert(`Insufficient stock! Available: ${currentStock} ${product.unit}`, 'error');
+            return;
+          }
+          
+          const unitCost = parseFloat(movement.unitCost) || product.currentUnitCost || 0;
+          const totalValue = movement.quantity * unitCost;
+          
+          const newMovement = {
+            ...movement,
+            date: new Date().toISOString(),
+            userId: user.id,
+            unitCost,
+            totalValue
+          };
+          
+          await db.movements.add(newMovement);
+          await loadData();
+          showAlert('Transaction recorded successfully', 'success');
+          
+          // Trigger data change for sync
+          window.dispatchEvent(new CustomEvent('dataChanged'));
+        } catch (error) {
+          console.error("Error recording transaction:", error);
+          showAlert('Error recording transaction', 'error');
+        }
+      };
+      
+      const importMovements = async (importBatch) => {
+        try {
+          if (!importBatch || importBatch.length === 0) {
+            showAlert('No valid data to import', 'error');
+            return;
+          }
+          
+          const batchId = `IMPORT_${Date.now()}`;
+          let successCount = 0;
+          let errorCount = 0;
+          
+          for (const item of importBatch) {
+            try {
+              const product = products.find(p => 
+                p.name.toLowerCase() === item.productName.toLowerCase()
+              );
+              
+              if (!product) {
+                errorCount++;
+                continue;
+              }
+              
+              const movement = {
+                productId: product.id,
+                type: 'IN',
+                quantity: parseInt(item.quantity),
+                unitCost: parseFloat(item.unitCost),
+                reference: item.reference || `IMPORT-${batchId}`,
+                date: item.date ? new Date(item.date).toISOString() : new Date().toISOString(),
+                userId: user.id,
+                totalValue: parseInt(item.quantity) * parseFloat(item.unitCost),
+                importBatch: batchId
+              };
+              
+              await db.movements.add(movement);
+              successCount++;
+              
+            } catch (error) {
+              console.error("Error importing item:", error);
+              errorCount++;
+            }
+          }
+          
+          await loadData();
+          
+          if (successCount > 0) {
+            showAlert(`Successfully imported ${successCount} records${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+            // Trigger data change for sync
+            window.dispatchEvent(new CustomEvent('dataChanged'));
+          }
+          
+          if (errorCount > 0 && successCount === 0) {
+            showAlert('No records were imported. Please check your data format.', 'error');
+          }
+          
+          setShowImportModal(false);
+          setImportData([]);
+          setImportErrors([]);
+          
+        } catch (error) {
+          console.error("Error importing movements:", error);
+          showAlert('Error importing data', 'error');
+        }
+      };
+      
+      const changePassword = async () => {
+        try {
+          // Validate current password
+          if (changePasswordData.currentPassword !== user.password) {
+            showAlert('Current password is incorrect', 'error');
+            return;
+          }
+          
+          // Validate new password
+          const validation = helpers.validatePassword(changePasswordData.newPassword);
+          if (!validation.valid) {
+            showAlert(validation.message, 'error');
+            return;
+          }
+          
+          // Check if new password matches confirmation
+          if (changePasswordData.newPassword !== changePasswordData.confirmPassword) {
+            showAlert('New password and confirmation do not match', 'error');
+            return;
+          }
+          
+          // Update password
+          await db.users.update(user.id, {
+            password: changePasswordData.newPassword
+          });
+          
+          // Update local user state
+          setUser({
+            ...user,
+            password: changePasswordData.newPassword
+          });
+          
+          // Clear form and close modal
+          setChangePasswordData({
+            currentPassword: '',
+            newPassword: '',
+            confirmPassword: ''
+          });
+          setShowChangePasswordModal(false);
+          
+          showAlert('Password changed successfully', 'success');
+        } catch (error) {
+          console.error("Error changing password:", error);
+          showAlert('Error changing password', 'error');
+        }
+      };
+      
+      const exportToExcel = (reportType, filters = {}) => {
+        try {
+          let reportData = [];
+          let fileName = '';
+          
+          if (reportType === 'stock') {
+            reportData = products
+              .filter(product => {
+                const status = helpers.getProductStatus(product.id, products, movements);
+                if (filters.status === 'out-of-stock') return status === 'OUT';
+                if (filters.status === 'low-stock') return status === 'LOW';
+                if (filters.status === 'in-stock') return status === 'OK';
+                return true;
+              })
+              .map(product => {
+                const stock = helpers.getProductBalance(product.id, movements);
+                const status = helpers.getProductStatus(product.id, products, movements);
+                const costData = helpers.calculateProductCost(product.id, movements);
+                
+                return {
+                  'Product ID': product.id,
+                  'Product Name': product.name,
+                  'Unit': product.unit,
+                  'Current Stock': stock,
+                  'Reorder Level': product.reorderLevel,
+                  'Total Cost of Purchases (GH¢)': costData.totalCost,
+                  'Average Unit Cost (GH¢)': costData.averageUnitCost.toFixed(2),
+                  'Current Inventory Value (GH¢)': costData.currentValue.toFixed(2),
+                  'Status': status
+                };
+              });
+            
+            fileName = `Stock_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+          } 
+          else if (reportType === 'transactions') {
+            const filteredMovements = movements.filter(movement => {
+              if (filters.startDate) {
+                const movementDate = new Date(movement.date);
+                const startDate = new Date(filters.startDate);
+                if (movementDate < startDate) return false;
+              }
+              
+              if (filters.endDate) {
+                const movementDate = new Date(movement.date);
+                const endDate = new Date(filters.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                if (movementDate > endDate) return false;
+              }
+              
+              return true;
+            });
+            
+            reportData = filteredMovements.map(movement => {
+              const product = products.find(p => p.id === movement.productId);
+              const userObj = users.find(u => u.id === movement.userId);
+              
+              return {
+                'Date': helpers.formatDateShort(movement.date),
+                'Product': product ? product.name : `Product ${movement.productId}`,
+                'Type': movement.type === 'IN' ? 'Receipt' : 'Issue',
+                'Quantity': movement.quantity,
+                'Unit Cost (GH¢)': movement.unitCost || 0,
+                'Total Value (GH¢)': movement.totalValue || 0,
+                'Reference': movement.reference || '-',
+                'User': userObj ? userObj.name : `User ${movement.userId}`,
+                'Import Batch': movement.importBatch || '-'
+              };
+            });
+            
+            fileName = `Transaction_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+          }
+          
+          const worksheet = XLSX.utils.json_to_sheet(reportData);
+          const workbook = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+          XLSX.writeFile(workbook, fileName);
+          
+          showAlert('Report exported successfully to Excel', 'success');
+        } catch (error) {
+          console.error("Export error:", error);
+          showAlert('Error exporting report', 'error');
+        }
+      };
+      
+      const exportToWord = (reportType, filters = {}) => {
+        try {
+          let headers = [];
+          let data = [];
+          let title = '';
+          
+          if (reportType === 'stock') {
+            title = 'Stock Report - DUR Ahafo Stores';
+            headers = ['Product', 'Unit', 'Current Stock', 'Reorder Level', 'Total Cost of Purchases (GH¢)', 'Average Unit Cost (GH¢)', 'Current Inventory Value (GH¢)', 'Status'];
+            
+            const filteredProducts = products
+              .filter(product => {
+                const status = helpers.getProductStatus(product.id, products, movements);
+                if (filters.status === 'out-of-stock') return status === 'OUT';
+                if (filters.status === 'low-stock') return status === 'LOW';
+                if (filters.status === 'in-stock') return status === 'OK';
+                return true;
+              });
+            
+            data = filteredProducts.map(product => {
+              const stock = helpers.getProductBalance(product.id, movements);
+              const status = helpers.getProductStatus(product.id, products, movements);
+              const costData = helpers.calculateProductCost(product.id, movements);
+              
+              return [
+                product.name,
+                product.unit,
+                stock.toString(),
+                product.reorderLevel.toString(),
+                helpers.formatCurrency(costData.totalCost),
+                helpers.formatCurrency(costData.averageUnitCost),
+                helpers.formatCurrency(costData.currentValue),
+                status === 'OUT' ? 'Out of Stock' : 
+                status === 'LOW' ? 'Low Stock' : 'In Stock'
+              ];
+            });
+          } 
+          else if (reportType === 'transactions') {
+            title = 'Transaction Report - DUR Ahafo Stores';
+            headers = ['Date', 'Product', 'Type', 'Quantity', 'Unit Cost (GH¢)', 'Total Value (GH¢)', 'Reference', 'User'];
+            
+            const filteredMovements = movements.filter(movement => {
+              if (filters.startDate) {
+                const movementDate = new Date(movement.date);
+                const startDate = new Date(filters.startDate);
+                if (movementDate < startDate) return false;
+              }
+              
+              if (filters.endDate) {
+                const movementDate = new Date(movement.date);
+                const endDate = new Date(filters.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                if (movementDate > endDate) return false;
+              }
+              
+              return true;
+            });
+            
+            data = filteredMovements.map(movement => {
+              const product = products.find(p => p.id === movement.productId);
+              const userObj = users.find(u => u.id === movement.userId);
+              
+              return [
+                helpers.formatDateShort(movement.date),
+                product ? product.name : `Product ${movement.productId}`,
+                movement.type === 'IN' ? 'Receipt' : 'Issue',
+                movement.quantity.toString(),
+                helpers.formatCurrency(movement.unitCost || 0),
+                helpers.formatCurrency(movement.totalValue || 0),
+                movement.reference || '-',
+                userObj ? userObj.name : `User ${movement.userId}`
+              ];
+            });
+          }
+          
+          const html = helpers.generateReportHTML(title, headers, data, filters);
+          helpers.exportToWord(html, title.replace(' - ', '_'));
+          
+          showAlert('Report exported successfully to Word', 'success');
+        } catch (error) {
+          console.error("Word export error:", error);
+          showAlert('Error exporting to Word', 'error');
+        }
+      };
+      
+      if (isLoading) {
+        return <LoadingScreen />;
+      }
+      
+      if (!user) {
+        return (
+          <div className="login-container">
+            <div className="login-box">
+              <h2><span style={{ background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span> DUR Ahafo Stores Management System</h2>
+              
+              {driveStatus.message && (
+                <div className={`login-status ${driveStatus.loading ? 'connecting' : driveStatus.initialized ? 'connected' : 'error'}`}>
+                  {driveStatus.loading ? '⏳' : driveStatus.initialized ? '✅' : '⚠️'}
+                  {driveStatus.message}
+                </div>
+              )}
+              
+              {alert.show && (
+                <div className={`alert alert-${alert.type}`}>
+                  <span>{alert.message}</span>
+                  <button className="close-alert" onClick={() => setAlert({ show: false })}>
+                    ×
+                  </button>
+                </div>
+              )}
+              
+              <form onSubmit={handleLogin}>
+                <div className="form-group">
+                  <label>Username</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter username"
+                    value={loginData.username}
+                    onChange={(e) => setLoginData({...loginData, username: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="Enter password"
+                    value={loginData.password}
+                    onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <button type="submit" className="btn" style={{ width: '100%', marginTop: '10px' }}>
+                  <span>🔑</span> Login
+                </button>
+              </form>
+              
+              <div style={{ marginTop: '25px', padding: '20px', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: '12px', border: '2px solid #e0e0e0' }}>
+                <h4 style={{ fontSize: '16px', color: '#1a237e', marginBottom: '15px', fontWeight: '600' }}>Demo Credentials:</h4>
+                <div style={{ fontSize: '14px', color: '#666' }}>
+                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / Store123</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / Super123</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Admin:</strong> admin / Admin123</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+      
+      return (
+        <>
+          <div className="app-container">
+            {/* Navigation Bar */}
+            <div className="navbar">
+              <div className="navbar-brand">
+                <span style={{ fontSize: '32px', background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span>
+                <span style={{ background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>DUR Ahafo Stores Management System</span>
+              </div>
+              
+              <div className="user-info">
+                <span>Welcome, <strong style={{ color: '#4ecdc4' }}>{user.name}</strong></span>
+                <span className="user-badge">{user.role}</span>
+                <button 
+                  className="btn btn-change-password" 
+                  onClick={() => setShowChangePasswordModal(true)}
+                  title="Change Password"
+                >
+                  <span>🔒</span> Change Password
+                </button>
+                <button 
+                  className="btn btn-import"
+                  onClick={() => setShowBackupModal(true)}
+                  style={{ padding: '8px 16px', fontSize: '14px' }}
+                  title="Backup & Sync"
+                >
+                  <span>☁️</span> Backup/Sync
+                </button>
+                <button className="btn btn-logout" onClick={logout}>
+                  <span>🚪</span> Logout
+                </button>
+              </div>
+            </div>
+            
+            {/* Sync Status */}
+            {lastSync && (
+              <div className="storage-status">
+                <span>Last Sync: {lastSync.toLocaleTimeString()}</span>
+                <span style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                  ✓ Multi-user sync enabled
+                </span>
+              </div>
+            )}
+            
+            {/* Alert */}
+            {alert.show && (
+              <div className={`alert alert-${alert.type}`}>
+                <span>{alert.message}</span>
+                <button className="close-alert" onClick={() => setAlert({ show: false })}>
+                  ×
+                </button>
+              </div>
+            )}
+            
+            {/* Tab Area */}
+            <div className="tab-area">
+              <div className="nav-buttons">
+                <button 
+                  className={`nav-btn dashboard ${activeView === 'dashboard' ? 'active' : ''}`}
+                  onClick={() => setActiveView('dashboard')}
+                >
+                  <span>📊</span> Dashboard
+                </button>
+                
+                <button 
+                  className={`nav-btn products ${activeView === 'products' ? 'active' : ''}`}
+                  onClick={() => setActiveView('products')}
+                >
+                  <span>📦</span> Products
+                </button>
+                
+                {(user.role === 'STOREKEEPER' || user.role === 'ADMIN') && (
+                  <button 
+                    className={`nav-btn transactions ${activeView === 'transactions' ? 'active' : ''}`}
+                    onClick={() => setActiveView('transactions')}
+                  >
+                    <span>💰</span> Transactions
+                  </button>
+                )}
+                
+                <button 
+                  className={`nav-btn history ${activeView === 'history' ? 'active' : ''}`}
+                  onClick={() => setActiveView('history')}
+                >
+                  <span>📋</span> History
+                </button>
+                
+                <button 
+                  className={`nav-btn reports ${activeView === 'reports' ? 'active' : ''}`}
+                  onClick={() => setActiveView('reports')}
+                >
+                  <span>📈</span> Reports
+                </button>
+                
+                {user.role === 'ADMIN' && (
+                  <button 
+                    className={`nav-btn users ${activeView === 'users' ? 'active' : ''}`}
+                    onClick={() => setActiveView('users')}
+                  >
+                    <span>👥</span> Users
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Main Content */}
+            <div className="main-content">
+              {activeView === 'dashboard' && (
+                <Dashboard 
+                  products={products}
+                  movements={movements}
+                  stats={stats}
+                  helpers={helpers}
+                />
+              )}
+              
+              {activeView === 'products' && (
+                <Products 
+                  products={products}
+                  movements={movements}
+                  addProduct={addProduct}
+                  updateProduct={updateProduct}
+                  deleteProduct={deleteProduct}
+                  confirmDelete={(product) => {
+                    setProductToDelete(product);
+                    setShowDeleteModal(true);
+                  }}
+                  user={user}
+                  helpers={helpers}
+                />
+              )}
+              
+              {activeView === 'transactions' && (user.role === 'STOREKEEPER' || user.role === 'ADMIN') && (
+                <Transactions 
+                  products={products}
+                  movements={movements}
+                  addMovement={addMovement}
+                  helpers={helpers}
+                  showImportModal={() => setShowImportModal(true)}
+                  user={user}
+                />
+              )}
+              
+              {activeView === 'history' && (
+                <History 
+                  products={products}
+                  movements={movements}
+                  users={users}
+                  helpers={helpers}
+                />
+              )}
+              
+              {activeView === 'reports' && (
+                <Reports 
+                  products={products}
+                  movements={movements}
+                  users={users}
+                  exportToExcel={exportToExcel}
+                  exportToWord={exportToWord}
+                  helpers={helpers}
+                />
+              )}
+              
+              {activeView === 'users' && user.role === 'ADMIN' && (
+                <Users 
+                  users={users}
+                  helpers={helpers}
+                  loadData={loadData}
+                />
+              )}
+            </div>
+          </div>
+          
+          {/* Delete Confirmation Modal */}
+          {showDeleteModal && productToDelete && (
+            <DeleteModal
+              product={productToDelete}
+              onConfirm={() => {
+                deleteProduct(productToDelete.id);
+                setShowDeleteModal(false);
+                setProductToDelete(null);
+              }}
+              onCancel={() => {
+                setShowDeleteModal(false);
+                setProductToDelete(null);
+              }}
+            />
+          )}
+          
+          {/* Change Password Modal */}
+          {showChangePasswordModal && (
+            <ChangePasswordModal
+              onChange={changePassword}
+              onCancel={() => {
+                setShowChangePasswordModal(false);
+                setChangePasswordData({
+                  currentPassword: '',
+                  newPassword: '',
+                  confirmPassword: ''
+                });
+              }}
+              data={changePasswordData}
+              setData={setChangePasswordData}
+              helpers={helpers}
+            />
+          )}
+          
+          {/* Import Modal */}
+          {showImportModal && (
+            <ImportModal
+              onImport={importMovements}
+              onCancel={() => {
+                setShowImportModal(false);
+                setImportData([]);
+                setImportErrors([]);
+              }}
+              importData={importData}
+              setImportData={setImportData}
+              importErrors={importErrors}
+              setImportErrors={setImportErrors}
+              products={products}
+              helpers={helpers}
+            />
+          )}
+          
+          {/* Backup Modal */}
+          {showBackupModal && (
+            <div className="modal-overlay">
+              <div className="modal" style={{ maxWidth: '800px' }}>
+                <BackupSync 
+                  showAlert={showAlert}
+                  onClose={() => setShowBackupModal(false)}
+                />
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+    
+    // ================= DASHBOARD COMPONENT =================
+    function Dashboard({ products, movements, stats, helpers }) {
+      const recentMovements = movements.slice(-10).reverse();
+      
+      if (!stats) return <div className="card">Loading dashboard...</div>;
+      
+      return (
+        <div>
+          {/* Stats Grid */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="stat-icon">📦</div>
+              <div className="stat-value">{stats.totalProducts}</div>
+              <div className="stat-label">Total Products</div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon">⚠️</div>
+              <div className="stat-value" style={{ 
+                background: stats.lowStock > 0 ? 'linear-gradient(135deg, #f1c40f 0%, #f39c12 100%)' : 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                {stats.lowStock}
+              </div>
+              <div className="stat-label">Low Stock Items</div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon">🛑</div>
+              <div className="stat-value" style={{ 
+                background: stats.outOfStock > 0 ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)' : 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                {stats.outOfStock}
+              </div>
+              <div className="stat-label">Out of Stock</div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon">💰</div>
+              <div className="stat-value">{helpers.formatCurrency(stats.totalInventoryValue)}</div>
+              <div className="stat-label">Total Inventory Value</div>
+            </div>
+            
+            <div className="stat-card">
+              <div className="stat-icon">📝</div>
+              <div className="stat-value">{stats.totalTransactions}</div>
+              <div className="stat-label">Total Transactions</div>
+            </div>
+          </div>
+          
+          {/* Low Stock Alerts */}
+          {stats.lowStock > 0 && (
+            <div className="card">
+              <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⚠️</span> Low Stock Alerts</h3>
+              <div className="dashboard-table-container">
+                <table className="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Unit</th>
+                      <th>Current Stock</th>
+                      <th>Reorder Level</th>
+                      <th>Total Cost of Purchases (GH¢)</th>
+                      <th>Average Unit Cost (GH¢)</th>
+                      <th>Current Inventory Value (GH¢)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products
+                      .filter(product => {
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        return status === 'LOW';
+                      })
+                      .map(product => {
+                        const stock = helpers.getProductBalance(product.id, movements);
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        const costData = helpers.calculateProductCost(product.id, movements);
+                        
+                        return (
+                          <tr key={product.id}>
+                            <td><strong>{product.name}</strong></td>
+                            <td>{product.unit}</td>
+                            <td style={{ color: '#f39c12', fontWeight: 'bold' }}>{stock}</td>
+                            <td>{product.reorderLevel}</td>
+                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                            <td>{helpers.formatCurrency(costData.currentValue)}</td>
+                            <td>
+                              <span className="status-badge status-low">
+                                ⚠️ Low Stock
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Recent Transactions */}
+          <div className="card">
+            <h3><span style={{ background: 'linear-gradient(135deg, #4ecdc4, #2ecc71)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🔄</span> Recent Transactions</h3>
+            <div className="dashboard-table-container">
+              <table className="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Unit Cost (GH¢)</th>
+                    <th>Total Value (GH¢)</th>
+                    <th>Reference</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentMovements.map(movement => {
+                    const product = products.find(p => p.id === movement.productId);
+                    return (
+                      <tr key={movement.id}>
+                        <td>{helpers.formatDate(movement.date)}</td>
+                        <td>{product ? product.name : `Product ${movement.productId}`}</td>
+                        <td>
+                          <span style={{
+                            color: movement.type === 'IN' ? '#2ecc71' : '#e74c3c',
+                            fontWeight: 'bold',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '5px'
+                          }}>
+                            {movement.type === 'IN' ? '📥 IN' : '📤 OUT'}
+                          </span>
+                        </td>
+                        <td>{movement.quantity}</td>
+                        <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
+                        <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
+                          {helpers.formatCurrency(movement.totalValue || 0)}
+                        </td>
+                        <td>{movement.reference || '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= PRODUCTS COMPONENT =================
+    function Products({ products, movements, addProduct, updateProduct, deleteProduct, confirmDelete, user, helpers }) {
+      const [newProduct, setNewProduct] = React.useState({
+        name: '',
+        unit: '',
+        reorderLevel: '',
+        currentUnitCost: ''
+      });
+      
+      const [editingProduct, setEditingProduct] = React.useState(null);
+      const [editForm, setEditForm] = React.useState({
+        name: '',
+        unit: '',
+        reorderLevel: '',
+        currentUnitCost: ''
+      });
+      
+      const handleAddProduct = () => {
+        addProduct(newProduct);
+        setNewProduct({ name: '', unit: '', reorderLevel: '', currentUnitCost: '' });
+      };
+      
+      const handleEditClick = (product) => {
+        setEditingProduct(product.id);
+        setEditForm({
+          name: product.name,
+          unit: product.unit,
+          reorderLevel: product.reorderLevel,
+          currentUnitCost: product.currentUnitCost || ''
+        });
+      };
+      
+      const handleUpdateProduct = () => {
+        updateProduct(editingProduct, editForm);
+        setEditingProduct(null);
+      };
+      
+      const handleCancelEdit = () => {
+        setEditingProduct(null);
+      };
+      
+      return (
+        <div className="card">
+          <h3><span style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span> Product Management ({products.length} products)</h3>
+          
+          {/* Add Product Form */}
+          {user.role === 'STOREKEEPER' && (
+            <div className="filter-section">
+              <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Add New Product</h4>
+              <div className="form-row">
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Product Name *"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Unit (e.g., Piece) *"
+                    value={newProduct.unit}
+                    onChange={(e) => setNewProduct({...newProduct, unit: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <input
+                    type="number"
+                    className="form-control"
+                    placeholder="Reorder Level"
+                    value={newProduct.reorderLevel}
+                    onChange={(e) => setNewProduct({...newProduct, reorderLevel: e.target.value})}
+                    min="0"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="form-control"
+                    placeholder="Unit Cost (GH¢)"
+                    value={newProduct.currentUnitCost}
+                    onChange={(e) => setNewProduct({...newProduct, currentUnitCost: e.target.value})}
+                    min="0"
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <button className="btn btn-add" onClick={handleAddProduct}>
+                    <span>➕</span> Add Product
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Products Table */}
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Unit</th>
+                  <th>Current Stock</th>
+                  <th>Reorder Level</th>
+                  <th>Total Cost of Purchases (GH¢)</th>
+                  <th>Average Unit Cost (GH¢)</th>
+                  <th>Current Value (GH¢)</th>
+                  <th>Status</th>
+                  {user.role === 'STOREKEEPER' && <th>Actions</th>}
+                </tr>
+              </thead>
+              <tbody>
+                {products.map(product => {
+                  const stock = helpers.getProductBalance(product.id, movements);
+                  const status = helpers.getProductStatus(product.id, products, movements);
+                  const costData = helpers.calculateProductCost(product.id, movements);
+                  
+                  if (editingProduct === product.id) {
+                    return (
+                      <tr key={product.id}>
+                        <td>{product.id}</td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={editForm.name}
+                            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                            style={{ width: '100%' }}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="form-control"
+                            value={editForm.unit}
+                            onChange={(e) => setEditForm({...editForm, unit: e.target.value})}
+                            style={{ width: '100%' }}
+                          />
+                        </td>
+                        <td>{stock}</td>
+                        <td>
+                          <input
+                            type="number"
+                            className="form-control"
+                            value={editForm.reorderLevel}
+                            onChange={(e) => setEditForm({...editForm, reorderLevel: e.target.value})}
+                            style={{ width: '100%' }}
+                          />
+                        </td>
+                        <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                        <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                        <td>{helpers.formatCurrency(costData.currentValue)}</td>
+                        <td>
+                          <span className={`status-badge status-${status.toLowerCase()}`}>
+                            {status === 'OUT' ? '🛑 Out' : 
+                             status === 'LOW' ? '⚠️ Low' : '✓ OK'}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            <button onClick={handleUpdateProduct} className="btn btn-add" style={{ padding: '8px 16px' }}>
+                              <span>💾</span> Save
+                            </button>
+                            <button onClick={handleCancelEdit} className="btn btn-delete" style={{ padding: '8px 16px' }}>
+                              <span>↩️</span> Cancel
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+                  
+                  return (
+                    <tr key={product.id}>
+                      <td>{product.id}</td>
+                      <td><strong>{product.name}</strong></td>
+                      <td>{product.unit}</td>
+                      <td style={{ 
+                        fontWeight: 'bold',
+                        color: stock === 0 ? '#e74c3c' : stock <= product.reorderLevel ? '#f39c12' : '#27ae60'
+                      }}>
+                        {stock}
+                      </td>
+                      <td>{product.reorderLevel}</td>
+                      <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                      <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                      <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                        {helpers.formatCurrency(costData.currentValue)}
+                      </td>
+                      <td>
+                        <span className={`status-badge status-${status.toLowerCase()}`}>
+                          {status === 'OUT' ? '🛑 Out of Stock' : 
+                           status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
+                        </span>
+                      </td>
+                      {user.role === 'STOREKEEPER' && (
+                        <td>
+                          <div className="action-buttons">
+                            <button 
+                              onClick={() => handleEditClick(product)} 
+                              className="btn btn-edit"
+                            >
+                              <span>✏️</span> Edit
+                            </button>
+                            <button 
+                              onClick={() => confirmDelete(product)} 
+                              className="btn btn-delete"
+                            >
+                              <span>🗑️</span> Delete
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= TRANSACTIONS COMPONENT =================
+    function Transactions({ products, movements, addMovement, helpers, showImportModal, user }) {
+      const [transaction, setTransaction] = React.useState({
+        productId: '',
+        type: 'IN',
+        quantity: '',
+        reference: '',
+        unitCost: ''
+      });
+      
+      const selectedProduct = products.find(p => p.id === parseInt(transaction.productId));
+      const currentStock = selectedProduct ? helpers.getProductBalance(selectedProduct.id, movements) : 0;
+      
+      const handleSubmit = () => {
+        if (!transaction.productId || !transaction.quantity || parseInt(transaction.quantity) <= 0) {
+          alert('Please select product and enter valid quantity');
+          return;
+        }
+        
+        const movement = {
+          productId: parseInt(transaction.productId),
+          type: transaction.type,
+          quantity: parseInt(transaction.quantity),
+          reference: transaction.reference,
+          unitCost: parseFloat(transaction.unitCost) || undefined
+        };
+        
+        addMovement(movement);
+        setTransaction({ productId: '', type: 'IN', quantity: '', reference: '', unitCost: '' });
+      };
+      
+      return (
+        <div className="card">
+          <h3><span style={{ background: 'linear-gradient(135deg, #9b59b6, #8e44ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>💰</span> Stock Transactions</h3>
+          
+          {/* Import Button */}
+          <div style={{ marginBottom: '25px' }}>
+            <button className="btn btn-import" onClick={showImportModal}>
+              <span>📥</span> Import Stock Received Data
+            </button>
+            <button 
+              className="btn btn-download-template" 
+              onClick={helpers.generateImportTemplate}
+              style={{ marginLeft: '10px' }}
+            >
+              <span>📋</span> Download Import Template
+            </button>
+          </div>
+          
+          <div className="filter-section">
+            <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>New Transaction</h4>
+            <div className="form-row">
+              <div className="form-group">
+                <select
+                  className="form-control"
+                  value={transaction.productId}
+                  onChange={e => setTransaction({...transaction, productId: e.target.value})}
+                  required
+                >
+                  <option value="">Select Product *</option>
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>
+                      {product.name} (Stock: {helpers.getProductBalance(product.id, movements)} {product.unit})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <select
+                  className="form-control"
+                  value={transaction.type}
+                  onChange={e => setTransaction({...transaction, type: e.target.value})}
+                >
+                  <option value="IN">📥 Receive Stock</option>
+                  <option value="OUT">📤 Issue Stock</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="number"
+                  className="form-control"
+                  placeholder="Quantity *"
+                  value={transaction.quantity}
+                  onChange={e => setTransaction({...transaction, quantity: e.target.value})}
+                  min="1"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="number"
+                  step="0.01"
+                  className="form-control"
+                  placeholder="Unit Cost (GH¢) - Optional"
+                  value={transaction.unitCost}
+                  onChange={e => setTransaction({...transaction, unitCost: e.target.value})}
+                  min="0"
+                />
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Reference Number"
+                  value={transaction.reference}
+                  onChange={e => setTransaction({...transaction, reference: e.target.value})}
+                />
+              </div>
+            </div>
+            
+            {selectedProduct && (
+              <div className="info-box">
+                <p><strong>Product:</strong> {selectedProduct.name}</p>
+                <p><strong>Current Stock:</strong> {currentStock} {selectedProduct.unit}</p>
+                <p><strong>Default Unit Cost:</strong> {helpers.formatCurrency(selectedProduct.currentUnitCost || 0)}</p>
+                <p><strong>Transaction Type:</strong> 
+                  <span style={{
+                    color: transaction.type === 'IN' ? '#27ae60' : '#e74c3c',
+                    marginLeft: '10px',
+                    fontWeight: 'bold'
+                  }}>
+                    {transaction.type === 'IN' ? '📥 Stock Receipt' : '📤 Stock Issue'}
+                  </span>
+                </p>
+                {transaction.quantity && (
+                  <>
+                    <p><strong>After Transaction:</strong> 
+                      <span style={{
+                        color: transaction.type === 'IN' ? '#27ae60' : '#e74c3c',
+                        marginLeft: '10px',
+                        fontWeight: 'bold'
+                      }}>
+                        {transaction.type === 'IN' 
+                          ? currentStock + parseInt(transaction.quantity || 0)
+                          : currentStock - parseInt(transaction.quantity || 0)} {selectedProduct.unit}
+                      </span>
+                    </p>
+                    <p><strong>Total Transaction Value (GH¢):</strong> 
+                      <span style={{
+                        color: '#27ae60',
+                        marginLeft: '10px',
+                        fontWeight: 'bold'
+                      }}>
+                        {helpers.formatCurrency(
+                          (parseFloat(transaction.quantity) || 0) * 
+                          (parseFloat(transaction.unitCost) || selectedProduct.currentUnitCost || 0)
+                        )}
+                      </span>
+                    </p>
+                  </>
+                )}
+              </div>
+            )}
+            
+            <button 
+              className="btn btn-transaction" 
+              onClick={handleSubmit}
+              style={{ marginTop: '20px' }}
+            >
+              <span>💾</span> Record Transaction
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= HISTORY COMPONENT =================
+    function History({ products, movements, users, helpers }) {
+      const [filters, setFilters] = React.useState({
+        type: '',
+        productId: '',
+        startDate: '',
+        endDate: ''
+      });
+      
+      const filteredMovements = movements.filter(movement => {
+        if (filters.type && movement.type !== filters.type) return false;
+        if (filters.productId && movement.productId !== parseInt(filters.productId)) return false;
+        
+        const movementDate = new Date(movement.date);
+        
+        if (filters.startDate) {
+          const startDate = new Date(filters.startDate);
+          startDate.setHours(0, 0, 0, 0);
+          if (movementDate < startDate) return false;
+        }
+        
+        if (filters.endDate) {
+          const endDate = new Date(filters.endDate);
+          endDate.setHours(23, 59, 59, 999);
+          if (movementDate > endDate) return false;
+        }
+        
+        return true;
+      }).reverse();
+      
+      return (
+        <div className="card">
+          <h3><span style={{ background: 'linear-gradient(135deg, #e67e22, #d35400)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📋</span> Transaction History ({filteredMovements.length} records)</h3>
+          
+          <div className="filter-section">
+            <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Filter History</h4>
+            <div className="form-row">
+              <div className="form-group">
+                <select
+                  className="form-control"
+                  value={filters.type}
+                  onChange={e => setFilters({...filters, type: e.target.value})}
+                >
+                  <option value="">All Types</option>
+                  <option value="IN">Receipts Only</option>
+                  <option value="OUT">Issues Only</option>
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <select
+                  className="form-control"
+                  value={filters.productId}
+                  onChange={e => setFilters({...filters, productId: e.target.value})}
+                >
+                  <option value="">All Products</option>
+                  {products.map(product => (
+                    <option key={product.id} value={product.id}>{product.name}</option>
+                  ))}
+                </select>
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder="Start Date"
+                  value={filters.startDate}
+                  onChange={e => setFilters({...filters, startDate: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <input
+                  type="date"
+                  className="form-control"
+                  placeholder="End Date"
+                  value={filters.endDate}
+                  onChange={e => setFilters({...filters, endDate: e.target.value})}
+                />
+              </div>
+              
+              <div className="form-group">
+                <button 
+                  className="btn"
+                  onClick={() => setFilters({ 
+                    type: '', 
+                    productId: '', 
+                    startDate: '', 
+                    endDate: ''
+                  })}
+                >
+                  Clear Filters
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date & Time</th>
+                  <th>Product</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>Unit Cost (GH¢)</th>
+                  <th>Total Value (GH¢)</th>
+                  <th>Reference</th>
+                  <th>User</th>
+                  <th>Import Batch</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredMovements.map(movement => {
+                  const product = products.find(p => p.id === movement.productId);
+                  const user = users.find(u => u.id === movement.userId);
+                  
+                  return (
+                    <tr key={movement.id}>
+                      <td>{helpers.formatDate(movement.date)}</td>
+                      <td>{product ? product.name : `Product ${movement.productId}`}</td>
+                      <td>
+                        <span style={{
+                          color: movement.type === 'IN' ? '#27ae60' : '#e74c3c',
+                          fontWeight: 'bold',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '5px'
+                        }}>
+                          {movement.type === 'IN' ? '📥 IN' : '📤 OUT'}
+                        </span>
+                      </td>
+                      <td>{movement.quantity}</td>
+                      <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
+                      <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
+                        {helpers.formatCurrency(movement.totalValue || 0)}
+                      </td>
+                      <td>{movement.reference || '-'}</td>
+                      <td>{user ? user.name : `User ${movement.userId}`}</td>
+                      <td>{movement.importBatch || '-'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            
+            {filteredMovements.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                No transactions found matching the filters.
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= REPORTS COMPONENT =================
+    function Reports({ products, movements, users, exportToExcel, exportToWord, helpers }) {
+      const [reportType, setReportType] = React.useState('stock');
+      const [filters, setFilters] = React.useState({
+        status: '',
+        startDate: '',
+        endDate: ''
+      });
+      
+      const handleExportExcel = () => {
+        exportToExcel(reportType, filters);
+      };
+      
+      const handleExportWord = () => {
+        exportToWord(reportType, filters);
+      };
+      
+      const handleFilterChange = (filterType, value) => {
+        setFilters(prev => ({
+          ...prev,
+          [filterType]: value
+        }));
+      };
+      
+      const clearFilters = () => {
+        setFilters({
+          status: '',
+          startDate: '',
+          endDate: ''
+        });
+      };
+      
+      const renderReportContent = () => {
+        switch(reportType) {
+          case 'stock':
+            const filteredProducts = products.filter(product => {
+              const status = helpers.getProductStatus(product.id, products, movements);
+              if (filters.status === 'out-of-stock') return status === 'OUT';
+              if (filters.status === 'low-stock') return status === 'LOW';
+              if (filters.status === 'in-stock') return status === 'OK';
+              return true;
+            });
+            
+            return (
+              <>
+                <div className="report-filters">
+                  <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Filter Options</h4>
+                  <div className="filter-row">
+                    <div className="filter-group">
+                      <label>Stock Status</label>
+                      <div className="status-filter-buttons">
+                        <button 
+                          className={`status-filter-btn out-of-stock ${filters.status === 'out-of-stock' ? 'active' : ''}`}
+                          onClick={() => handleFilterChange('status', filters.status === 'out-of-stock' ? '' : 'out-of-stock')}
+                        >
+                          🛑 Out of Stock
+                        </button>
+                        <button 
+                          className={`status-filter-btn low-stock ${filters.status === 'low-stock' ? 'active' : ''}`}
+                          onClick={() => handleFilterChange('status', filters.status === 'low-stock' ? '' : 'low-stock')}
+                        >
+                          ⚠️ Low Stock
+                        </button>
+                        <button 
+                          className={`status-filter-btn in-stock ${filters.status === 'in-stock' ? 'active' : ''}`}
+                          onClick={() => handleFilterChange('status', filters.status === 'in-stock' ? '' : 'in-stock')}
+                        >
+                          ✅ In Stock
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '15px' }}>
+                    <button className="btn btn-filter" onClick={clearFilters}>
+                      Clear Filters
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Unit</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Total Cost of Purchases (GH¢)</th>
+                        <th>Average Unit Cost (GH¢)</th>
+                        <th>Current Inventory Value (GH¢)</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredProducts.map(product => {
+                        const stock = helpers.getProductBalance(product.id, movements);
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        const costData = helpers.calculateProductCost(product.id, movements);
+                        
+                        return (
+                          <tr key={product.id}>
+                            <td><strong>{product.name}</strong></td>
+                            <td>{product.unit}</td>
+                            <td style={{ fontWeight: 'bold' }}>{stock}</td>
+                            <td>{product.reorderLevel}</td>
+                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                            <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                              {helpers.formatCurrency(costData.currentValue)}
+                            </td>
+                            <td>
+                              <span className={`status-badge status-${status.toLowerCase()}`}>
+                                {status === 'OUT' ? '🛑 Out of Stock' : 
+                                 status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  
+                  {filteredProducts.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                      No products found matching the filters.
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+            
+          case 'transactions':
+            const filteredMovements = movements.filter(movement => {
+              if (filters.startDate) {
+                const movementDate = new Date(movement.date);
+                const startDate = new Date(filters.startDate);
+                if (movementDate < startDate) return false;
+              }
+              
+              if (filters.endDate) {
+                const movementDate = new Date(movement.date);
+                const endDate = new Date(filters.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                if (movementDate > endDate) return false;
+              }
+              
+              return true;
+            });
+            
+            return (
+              <>
+                <div className="report-filters">
+                  <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Filter Options</h4>
+                  <div className="filter-row">
+                    <div className="filter-group">
+                      <label>Date Range</label>
+                      <div className="form-row" style={{ margin: 0 }}>
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <input
+                            type="date"
+                            className="form-control"
+                            placeholder="Start Date"
+                            value={filters.startDate}
+                            onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                          />
+                        </div>
+                        <div className="form-group" style={{ flex: 1 }}>
+                          <input
+                            type="date"
+                            className="form-control"
+                            placeholder="End Date"
+                            value={filters.endDate}
+                            onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: '15px' }}>
+                    <button className="btn btn-filter" onClick={clearFilters}>
+                      Clear Filters
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Unit Cost (GH¢)</th>
+                        <th>Total Value (GH¢)</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                        <th>Import Batch</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredMovements.map(movement => {
+                        const product = products.find(p => p.id === movement.productId);
+                        const user = users.find(u => u.id === movement.userId);
+                        
+                        return (
+                          <tr key={movement.id}>
+                            <td>{helpers.formatDateShort(movement.date)}</td>
+                            <td>{product ? product.name : `Product ${movement.productId}`}</td>
+                            <td>
+                              <span style={{
+                                color: movement.type === 'IN' ? '#27ae60' : '#e74c3c',
+                                fontWeight: 'bold'
+                              }}>
+                                {movement.type === 'IN' ? 'Receipt' : 'Issue'}
+                              </span>
+                            </td>
+                            <td>{movement.quantity}</td>
+                            <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
+                            <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
+                              {helpers.formatCurrency(movement.totalValue || 0)}
+                            </td>
+                            <td>{movement.reference || '-'}</td>
+                            <td>{user ? user.name : `User ${movement.userId}`}</td>
+                            <td>{movement.importBatch || '-'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  
+                  {filteredMovements.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+                      No transactions found matching the filters.
+                    </div>
+                  )}
+                </div>
+              </>
+            );
+            
+          default:
+            return <div>Select a report type</div>;
+        }
+      };
+      
+      return (
+        <div className="card">
+          <h3><span style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📈</span> Reports</h3>
+          
+          <div className="report-type-selector">
+            <button 
+              className={`report-type-btn ${reportType === 'stock' ? 'active' : ''}`}
+              onClick={() => setReportType('stock')}
+            >
+              <span>📊</span> Stock Report
+            </button>
+            <button 
+              className={`report-type-btn ${reportType === 'transactions' ? 'active' : ''}`}
+              onClick={() => setReportType('transactions')}
+            >
+              <span>📋</span> Transaction Report
+            </button>
+          </div>
+          
+          <div className="report-controls">
+            <button 
+              className="btn btn-export"
+              onClick={handleExportExcel}
+            >
+              <span>📥</span> Export to Excel
+            </button>
+            <button 
+              className="btn btn-word"
+              onClick={handleExportWord}
+            >
+              <span>📄</span> Export to Word
+            </button>
+          </div>
+          
+          {renderReportContent()}
+        </div>
+      );
+    }
+    
+    // ================= IMPORT MODAL =================
+    function ImportModal({ onImport, onCancel, importData, setImportData, importErrors, setImportErrors, products, helpers }) {
+      const [isDragging, setIsDragging] = React.useState(false);
+      const fileInputRef = React.useRef(null);
+      
+      const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          readExcelFile(file);
+        }
+      };
+      
+      const readExcelFile = (file) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            const processedData = [];
+            const errors = [];
+            
+            jsonData.forEach((row, index) => {
+              const rowNumber = index + 2;
+              
+              if (!row['Product Name']) {
+                errors.push(`Row ${rowNumber}: Missing product name`);
+                return;
+              }
+              
+              if (!row['Quantity'] || isNaN(parseInt(row['Quantity'])) || parseInt(row['Quantity']) <= 0) {
+                errors.push(`Row ${rowNumber}: Invalid quantity`);
+                return;
+              }
+              
+              const unitCost = row['Unit Cost (GH¢)'] || row['Unit Cost'];
+              if (!unitCost || isNaN(parseFloat(unitCost)) || parseFloat(unitCost) < 0) {
+                errors.push(`Row ${rowNumber}: Invalid unit cost`);
+                return;
+              }
+              
+              const product = products.find(p => 
+                p.name.toLowerCase() === row['Product Name'].toString().toLowerCase().trim()
+              );
+              
+              if (!product) {
+                errors.push(`Row ${rowNumber}: Product "${row['Product Name']}" not found in system`);
+                return;
+              }
+              
+              processedData.push({
+                productName: row['Product Name'].toString().trim(),
+                quantity: parseInt(row['Quantity']),
+                unitCost: parseFloat(unitCost),
+                reference: row['Reference'] || `IMPORT-${Date.now()}`,
+                date: row['Date'] ? new Date(row['Date']).toISOString() : new Date().toISOString()
+              });
+            });
+            
+            setImportData(processedData);
+            setImportErrors(errors);
+            
+            if (processedData.length === 0 && errors.length > 0) {
+              alert('No valid data found in file. Please check the template format.');
+            }
+            
+          } catch (error) {
+            console.error("Error reading Excel file:", error);
+            alert('Error reading file. Please make sure it is a valid Excel file.');
+          }
+        };
+        
+        reader.readAsArrayBuffer(file);
+      };
+      
+      return (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3><span style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📥</span> Import Stock Received Data</h3>
+            
+            <div className="import-section">
+              <div style={{ textAlign: 'center' }}>
+                <button 
+                  className="btn btn-import"
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  <span>📄</span> Select Excel File
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  accept=".xlsx,.xls"
+                  onChange={handleFileSelect}
+                />
+              </div>
+              
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button 
+                  className="btn btn-download-template" 
+                  onClick={helpers.generateImportTemplate}
+                >
+                  <span>📋</span> Download Template
+                </button>
+              </div>
+            </div>
+            
+            {importData.length > 0 && (
+              <div className="import-preview">
+                <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Preview ({importData.length} records)</h4>
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Unit Cost (GH¢)</th>
+                        <th>Reference</th>
+                        <th>Total Value (GH¢)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importData.slice(0, 10).map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.productName}</td>
+                          <td>{item.quantity}</td>
+                          <td>{helpers.formatCurrency(item.unitCost)}</td>
+                          <td>{item.reference}</td>
+                          <td>{helpers.formatCurrency(item.quantity * item.unitCost)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {importErrors.length > 0 && (
+              <div className="alert alert-warning">
+                <div>
+                  <strong>Found {importErrors.length} error(s):</strong>
+                  <ul style={{ marginTop: '5px', marginLeft: '20px', fontSize: '13px' }}>
+                    {importErrors.slice(0, 5).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button 
+                onClick={() => onImport(importData)} 
+                className="btn btn-import"
+                disabled={importData.length === 0}
+              >
+                <span>📥</span> Import Data
+              </button>
+              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
+                <span>↩️</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= CHANGE PASSWORD MODAL =================
+    function ChangePasswordModal({ onChange, onCancel, data, setData, helpers }) {
+      const [validation, setValidation] = React.useState({ valid: true, message: '' });
+      
+      const handleNewPasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setData({ ...data, newPassword });
+        
+        if (newPassword.length > 0) {
+          const validationResult = helpers.validatePassword(newPassword);
+          setValidation(validationResult);
+        } else {
+          setValidation({ valid: true, message: '' });
+        }
+      };
+      
+      return (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3><span style={{ background: 'linear-gradient(135deg, #7f8c8d, #34495e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🔒</span> Change Password</h3>
+            
+            <div className="form-group">
+              <label>Current Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter current password"
+                value={data.currentPassword}
+                onChange={(e) => setData({ ...data, currentPassword: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter new password"
+                value={data.newPassword}
+                onChange={handleNewPasswordChange}
+                required
+              />
+              {data.newPassword && (
+                <div style={{ 
+                  marginTop: '5px', 
+                  fontSize: '12px',
+                  color: validation.valid ? '#2ecc71' : '#e74c3c',
+                  fontWeight: '600'
+                }}>
+                  {validation.message}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Confirm new password"
+                value={data.confirmPassword}
+                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
+                required
+              />
+              {data.confirmPassword && data.newPassword !== data.confirmPassword && (
+                <div style={{ marginTop: '5px', fontSize: '12px', color: '#e74c3c', fontWeight: '600' }}>
+                  Passwords do not match
+                </div>
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button 
+                onClick={onChange} 
+                className="btn"
+                disabled={!validation.valid || data.newPassword !== data.confirmPassword}
+              >
+                <span>💾</span> Change Password
+              </button>
+              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
+                <span>↩️</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= USERS COMPONENT =================
+    function Users({ users, helpers, loadData }) {
+      const [showAddUserModal, setShowAddUserModal] = React.useState(false);
+      const [newUser, setNewUser] = React.useState({
+        username: '',
+        name: '',
+        password: '',
+        role: 'STOREKEEPER'
+      });
+      
+      const handleAddUser = async () => {
+        try {
+          if (!newUser.username || !newUser.name || !newUser.password) {
+            alert('Please fill all required fields');
+            return;
+          }
+          
+          const validation = helpers.validatePassword(newUser.password);
+          if (!validation.valid) {
+            alert(validation.message);
+            return;
+          }
+          
+          // Check if username exists
+          const existing = await db.users.where("username").equals(newUser.username).first();
+          if (existing) {
+            alert('Username already exists');
+            return;
+          }
+          
+          await db.users.add({
+            username: newUser.username.trim(),
+            name: newUser.name.trim(),
+            password: newUser.password,
+            role: newUser.role
+          });
+          
+          await loadData();
+          setShowAddUserModal(false);
+          setNewUser({ username: '', name: '', password: '', role: 'STOREKEEPER' });
+          alert('User added successfully');
+        } catch (error) {
+          console.error("Error adding user:", error);
+          alert('Error adding user');
+        }
+      };
+      
+      return (
+        <div className="card">
+          <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>👥</span> User Management</h3>
+          
+          <div style={{ marginBottom: '25px' }}>
+            <button className="btn btn-add" onClick={() => setShowAddUserModal(true)}>
+              <span>👤</span> Add New User
+            </button>
+          </div>
+          
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(user => (
+                  <tr key={user.id}>
+                    <td><strong>{user.username}</strong></td>
+                    <td>{user.name}</td>
+                    <td>
+                      <span style={{
+                        background: user.role === 'ADMIN' ? 'linear-gradient(135deg, #e74c3c 0%, #c0392b 100%)' : 
+                                   user.role === 'STOREKEEPER' ? 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)' : 
+                                   'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
+                        color: 'white',
+                        padding: '6px 16px',
+                        borderRadius: '20px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                      }}>
+                        {user.role}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Add User Modal */}
+          {showAddUserModal && (
+            <div className="modal-overlay">
+              <div className="modal">
+                <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>👤</span> Add New User</h3>
+                
+                <div className="form-group">
+                  <label>Username *</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter username"
+                    value={newUser.username}
+                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Full Name *</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Enter full name"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Password *</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    placeholder="Enter password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Role *</label>
+                  <select
+                    className="form-control"
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                  >
+                    <option value="STOREKEEPER">Storekeeper</option>
+                    <option value="SUPERVISOR">Supervisor</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </div>
+                
+                <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+                  <button onClick={handleAddUser} className="btn btn-add">
+                    <span>➕</span> Add User
+                  </button>
+                  <button onClick={() => setShowAddUserModal(false)} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
+                    <span>↩️</span> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // ================= DELETE MODAL =================
+    function DeleteModal({ product, onConfirm, onCancel }) {
+      return (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⚠️</span> Confirm Delete</h3>
+            <p>Are you sure you want to delete <strong style={{ color: '#e74c3c' }}>{product.name}</strong>?</p>
+            <p style={{ color: '#e74c3c', marginTop: '15px', fontSize: '14px', fontWeight: '600' }}>
+              ⚠️ Note: You cannot delete products that have transaction history.
+            </p>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button onClick={onConfirm} className="btn btn-delete">
+                <span>🗑️</span> Delete
+              </button>
+              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
+                <span>↩️</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= RENDER APP =================
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

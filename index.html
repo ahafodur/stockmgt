@@ -11,6 +11,7 @@
   <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@7.8.0/build/index.min.js"></script>
   <!-- Google APIs -->
   <script src="https://apis.google.com/js/api.js"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
@@ -24,11 +25,11 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
-      color: #333;
+      color: #2c3e50;
     }
     
     /* ============== LAYOUT ============== */
@@ -40,6 +41,7 @@
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
       overflow: hidden;
       min-height: 90vh;
+      position: relative;
     }
     
     /* ============== LOADING SCREEN ============== */
@@ -63,6 +65,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
     }
     
     .loading-spinner {
@@ -73,6 +76,7 @@
       border-top-color: #4ecdc4;
       animation: spin 1s linear infinite;
       margin: 20px 0;
+      box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
     }
     
     @keyframes bounce {
@@ -103,6 +107,24 @@
       max-width: 400px;
       animation: slideUp 0.5s ease;
       border: 3px solid #4ecdc4;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+      animation: gradientMove 3s ease infinite;
+    }
+    
+    @keyframes gradientMove {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
     }
     
     @keyframes slideUp {
@@ -119,6 +141,7 @@
       justify-content: center;
       gap: 10px;
       font-size: 24px;
+      font-weight: 700;
     }
     
     /* ============== FORM CONTROLS ============== */
@@ -132,6 +155,8 @@
       color: #1a237e;
       font-weight: 600;
       font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .form-control {
@@ -143,13 +168,15 @@
       transition: all 0.3s;
       background: #f8f9fa;
       color: #1a237e;
+      font-weight: 500;
     }
     
     .form-control:focus {
       outline: none;
       border-color: #4ecdc4;
       background: white;
-      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
+      box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
+      transform: translateY(-2px);
     }
     
     .form-row {
@@ -166,7 +193,7 @@
       margin-bottom: 0;
     }
     
-    /* ============== BUTTONS WITH ENHANCED SHADOWS ============== */
+    /* ============== BUTTONS ============== */
     .btn {
       display: inline-flex;
       align-items: center;
@@ -180,11 +207,11 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       white-space: nowrap;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
       position: relative;
       overflow: hidden;
     }
@@ -192,67 +219,47 @@
     .btn::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    
-    .btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 25px rgba(78, 205, 196, 0.5);
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
     }
     
     .btn:hover::before {
-      width: 300px;
-      height: 300px;
+      left: 100%;
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
     }
     
     .btn:active {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+      transform: translateY(0);
     }
     
     .btn-logout {
       background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
-      box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
-    }
-    
-    .btn-logout:hover {
-      box-shadow: 0 12px 25px rgba(255, 107, 107, 0.5);
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
     }
     
     .btn-add {
       background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-      box-shadow: 0 6px 20px rgba(46, 204, 113, 0.3);
-    }
-    
-    .btn-add:hover {
-      box-shadow: 0 12px 25px rgba(46, 204, 113, 0.5);
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
     }
     
     .btn-transaction {
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
-    }
-    
-    .btn-transaction:hover {
-      box-shadow: 0 12px 25px rgba(52, 152, 219, 0.5);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     }
     
     .btn-delete {
       background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
-    }
-    
-    .btn-delete:hover {
-      box-shadow: 0 12px 25px rgba(231, 76, 60, 0.5);
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
     }
     
     .btn-edit {
@@ -260,93 +267,44 @@
       color: #212529;
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 6px 20px rgba(241, 196, 15, 0.3);
-    }
-    
-    .btn-edit:hover {
-      box-shadow: 0 12px 25px rgba(241, 196, 15, 0.5);
+      box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
     }
     
     .btn-export {
       background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-      box-shadow: 0 6px 20px rgba(155, 89, 182, 0.3);
+      box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
     }
     
-    .btn-export:hover {
-      box-shadow: 0 12px 25px rgba(155, 89, 182, 0.5);
+    .btn-export-word {
+      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
     }
     
     .btn-print {
       background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-      box-shadow: 0 6px 20px rgba(230, 126, 34, 0.3);
-    }
-    
-    .btn-print:hover {
-      box-shadow: 0 12px 25px rgba(230, 126, 34, 0.5);
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
     }
     
     .btn-save {
       background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-      box-shadow: 0 6px 20px rgba(26, 188, 156, 0.3);
-    }
-    
-    .btn-save:hover {
-      box-shadow: 0 12px 25px rgba(26, 188, 156, 0.5);
+      box-shadow: 0 4px 15px rgba(26, 188, 156, 0.3);
     }
     
     .btn-change-password {
       background: linear-gradient(135deg, #7f8c8d 0%, #34495e 100%);
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 6px 20px rgba(127, 140, 141, 0.3);
-    }
-    
-    .btn-change-password:hover {
-      box-shadow: 0 12px 25px rgba(127, 140, 141, 0.5);
+      box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
     }
     
     .btn-import {
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
-    }
-    
-    .btn-import:hover {
-      box-shadow: 0 12px 25px rgba(52, 152, 219, 0.5);
+      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
     }
     
     .btn-download-template {
       background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-      box-shadow: 0 6px 20px rgba(149, 165, 166, 0.3);
-    }
-    
-    .btn-download-template:hover {
-      box-shadow: 0 12px 25px rgba(149, 165, 166, 0.5);
-    }
-    
-    .btn-word {
-      background: linear-gradient(135deg, #185abd 0%, #0d47a1 100%);
-      box-shadow: 0 6px 20px rgba(24, 90, 189, 0.3);
-    }
-    
-    .btn-word:hover {
-      box-shadow: 0 12px 25px rgba(24, 90, 189, 0.5);
-    }
-    
-    .btn-filter {
-      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-      padding: 8px 16px;
-      font-size: 14px;
-      box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-    }
-    
-    .btn-filter:hover {
-      box-shadow: 0 8px 20px rgba(108, 117, 125, 0.5);
-      transform: translateY(-2px);
-    }
-    
-    .btn-filter.active {
-      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
     }
     
     .google-btn {
@@ -357,11 +315,11 @@
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 6px 20px rgba(66, 133, 244, 0.3);
+      box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
       position: relative;
       overflow: hidden;
     }
@@ -369,24 +327,21 @@
     .google-btn::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    
-    .google-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 25px rgba(66, 133, 244, 0.5);
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
     }
     
     .google-btn:hover::before {
-      width: 300px;
-      height: 300px;
+      left: 100%;
+    }
+    
+    .google-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
     }
     
     /* ============== NAVIGATION ============== */
@@ -401,6 +356,7 @@
       top: 0;
       z-index: 100;
       border-bottom: 4px solid #4ecdc4;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     
     .navbar-brand {
@@ -432,6 +388,7 @@
       background: linear-gradient(135deg, #0d1b2a 0%, #1b3a4b 100%);
       padding: 10px 30px;
       border-bottom: 3px solid #4ecdc4;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
     .nav-buttons {
@@ -452,7 +409,7 @@
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       font-size: 14px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -463,33 +420,51 @@
     .nav-btn::before {
       content: '';
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .nav-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+      transform: translateY(3px);
+      transition: transform 0.3s;
     }
     
     .nav-btn:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
       color: white;
     }
     
+    .nav-btn:hover::after {
+      transform: translateY(0);
+    }
+    
     .nav-btn:hover::before {
-      width: 200px;
-      height: 200px;
+      opacity: 1;
     }
     
     .nav-btn.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: transparent;
-      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.5);
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
       transform: translateY(-2px);
+    }
+    
+    .nav-btn.active::after {
+      transform: translateY(0);
     }
     
     /* Individual tab colors */
@@ -543,18 +518,19 @@
     
     /* ============== CARDS ============== */
     .card {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      background: white;
       border-radius: 15px;
       padding: 30px;
       margin: 25px 30px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
       border: 1px solid #e0e0e0;
       position: relative;
       overflow: hidden;
-      transition: box-shadow 0.3s ease;
+      transition: transform 0.3s, box-shadow 0.3s;
     }
     
     .card:hover {
+      transform: translateY(-5px);
       box-shadow: 0 15px 35px rgba(0,0,0,0.12);
     }
     
@@ -566,6 +542,7 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+      animation: gradientMove 3s ease infinite;
     }
     
     .card h3 {
@@ -586,7 +563,8 @@
       margin-top: 20px;
       border-radius: 12px;
       border: 1px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      background: white;
     }
     
     table {
@@ -607,19 +585,24 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       font-size: 14px;
+      white-space: nowrap;
     }
     
     td {
       padding: 16px;
       border-bottom: 1px solid #e0e0e0;
       vertical-align: middle;
-      color: #333;
+      color: #2c3e50;
+      font-weight: 500;
+    }
+    
+    tr {
+      transition: all 0.3s;
     }
     
     tr:hover {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
       transform: scale(1.002);
-      transition: transform 0.2s;
     }
     
     /* ============== STATUS BADGES ============== */
@@ -635,6 +618,11 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    
+    .status-badge:hover {
+      transform: scale(1.05);
     }
     
     .status-ok {
@@ -661,8 +649,21 @@
       align-items: center;
       justify-content: space-between;
       animation: slideIn 0.3s ease;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
       border: 2px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .alert::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0.3;
     }
     
     @keyframes slideIn {
@@ -714,6 +715,7 @@
     .close-alert:hover {
       opacity: 1;
       background: rgba(0,0,0,0.1);
+      transform: rotate(90deg);
     }
     
     /* ============== STATS GRID ============== */
@@ -725,13 +727,13 @@
     }
     
     .stat-card {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      background: white;
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
       text-align: center;
       border: 1px solid #e0e0e0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s, box-shadow 0.3s;
       position: relative;
       overflow: hidden;
     }
@@ -744,11 +746,12 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+      animation: gradientMove 3s ease infinite;
     }
     
     .stat-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
     }
     
     .stat-icon {
@@ -758,6 +761,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
     }
     
     .stat-value {
@@ -768,6 +772,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .stat-label {
@@ -785,7 +790,28 @@
       border-radius: 15px;
       margin-bottom: 25px;
       border: 2px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .filter-group {
+      margin-bottom: 20px;
+    }
+    
+    .filter-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #1a237e;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .filter-row {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
     }
     
     .quick-filters {
@@ -795,30 +821,58 @@
       flex-wrap: wrap;
     }
     
-    .quick-filter-btn {
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       background: white;
       border: 2px solid #dee2e6;
-      padding: 10px 20px;
-      border-radius: 8px;
+      padding: 8px 16px;
+      border-radius: 25px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       font-size: 14px;
       font-weight: 500;
       color: #666;
+      user-select: none;
     }
     
-    .quick-filter-btn:hover {
+    .filter-chip:hover {
       border-color: #4ecdc4;
       color: #4ecdc4;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
-    .quick-filter-btn.active {
+    .filter-chip.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: #4ecdc4;
-      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+    }
+    
+    .filter-chip.active:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+    }
+    
+    /* ============== REPORT FILTERS ============== */
+    .report-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    
+    .date-range-picker {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    .date-range-picker .form-group {
+      flex: 1;
+      margin-bottom: 0;
     }
     
     /* ============== MODALS ============== */
@@ -843,7 +897,7 @@
     }
     
     .modal {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      background: white;
       padding: 35px;
       border-radius: 20px;
       min-width: 500px;
@@ -864,6 +918,7 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
+      animation: gradientMove 3s ease infinite;
     }
     
     @keyframes scaleIn {
@@ -974,27 +1029,44 @@
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s;
       display: flex;
       align-items: center;
       gap: 10px;
       color: #666;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .report-type-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .report-type-btn:hover::before {
+      left: 100%;
     }
     
     .report-type-btn:hover {
       border-color: #4ecdc4;
       color: #4ecdc4;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     
     .report-type-btn.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: #4ecdc4;
-      box-shadow: 0 6px 15px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
     }
     
     /* ============== IMPORT SECTION ============== */
@@ -1049,7 +1121,7 @@
       border-radius: 15px;
       margin-bottom: 25px;
       border: 2px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     
     .google-status {
@@ -1151,7 +1223,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     }
     
     .storage-bar {
@@ -1178,6 +1250,11 @@
       align-items: center;
       gap: 8px;
       font-weight: 600;
+    }
+    
+    /* ============== DASHBOARD RECENT TRANSACTIONS ============== */
+    .dashboard-recent-table th {
+      white-space: nowrap;
     }
     
     /* ============== RESPONSIVE ============== */
@@ -1234,6 +1311,14 @@
         margin: 10px;
         padding: 25px;
       }
+      
+      .report-filters {
+        grid-template-columns: 1fr;
+      }
+      
+      .date-range-picker {
+        flex-direction: column;
+      }
     }
     
     /* ============== UTILITY CLASSES ============== */
@@ -1284,142 +1369,74 @@
       background-clip: text;
     }
     
-    /* ============== REPORT FILTERS ============== */
-    .report-filters {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      border: 2px solid #e0e0e0;
-    }
-    
-    .filter-row {
+    /* ============== MULTI-SELECT FILTERS ============== */
+    .multi-select {
       display: flex;
-      gap: 15px;
-      margin-bottom: 15px;
       flex-wrap: wrap;
-    }
-    
-    .filter-group {
-      flex: 1;
-      min-width: 200px;
-    }
-    
-    .status-filter-buttons {
-      display: flex;
       gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 10px;
     }
     
-    .status-filter-btn {
-      padding: 8px 16px;
-      border: 2px solid #dee2e6;
-      background: white;
-      border-radius: 6px;
-      cursor: pointer;
+    .filter-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e9ecef;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 13px;
-      font-weight: 600;
-      transition: all 0.3s;
+      font-weight: 500;
+      color: #495057;
     }
     
-    .status-filter-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .filter-tag .remove {
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 2px;
+      border-radius: 50%;
     }
     
-    .status-filter-btn.active {
-      color: white;
+    .filter-tag .remove:hover {
+      background: rgba(0,0,0,0.1);
     }
     
-    .status-filter-btn.out-of-stock {
-      border-color: #e74c3c;
-    }
-    
-    .status-filter-btn.out-of-stock.active {
-      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-      color: white;
-    }
-    
-    .status-filter-btn.low-stock {
-      border-color: #f1c40f;
-    }
-    
-    .status-filter-btn.low-stock.active {
-      background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
-      color: white;
-    }
-    
-    .status-filter-btn.in-stock {
-      border-color: #2ecc71;
-    }
-    
-    .status-filter-btn.in-stock.active {
-      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-      color: white;
-    }
-    
-    /* ============== DASHBOARD TABLE IMPROVEMENTS ============== */
-    .dashboard-table-container {
-      overflow-x: auto;
-      margin-top: 20px;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    
-    .dashboard-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    .dashboard-table th {
-      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-      padding: 15px;
-      text-align: left;
-      font-weight: 600;
-      color: white;
-      border-bottom: 3px solid #4ecdc4;
-      position: sticky;
-      top: 0;
-    }
-    
-    .dashboard-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    
-    .dashboard-table tr:hover {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    }
-    
-    /* ============== LOGIN STATUS INDICATORS ============== */
-    .login-status {
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      font-size: 14px;
+    /* ============== GOOGLE DRIVE STATUS ============== */
+    .drive-status-indicator {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
-    .login-status.connecting {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
+    .drive-connected {
+      background: linear-gradient(135deg, #34a853 0%, #0d652d 100%);
+      color: white;
     }
     
-    .login-status.connected {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+    .drive-disconnected {
+      background: linear-gradient(135deg, #ea4335 0%, #b71c1c 100%);
+      color: white;
     }
     
-    .login-status.error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
+    .drive-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    .drive-connected .drive-status-dot {
+      background: #34a853;
+      box-shadow: 0 0 10px #34a853;
+    }
+    
+    .drive-disconnected .drive-status-dot {
+      background: #ea4335;
+      box-shadow: 0 0 10px #ea4335;
     }
   </style>
 </head>
@@ -1498,23 +1515,25 @@
       
       async signIn() {
         try {
+          const tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: this.CLIENT_ID,
+            scope: this.SCOPES,
+            callback: (response) => {
+              if (response.access_token) {
+                gapi.client.setToken(response);
+                localStorage.setItem('googleDriveToken', JSON.stringify(response));
+                this.isSignedIn = true;
+                return true;
+              }
+              return false;
+            },
+          });
+          
+          tokenClient.requestAccessToken({ prompt: 'consent' });
+          
+          // Wait for callback
           return new Promise((resolve) => {
-            const tokenClient = google.accounts.oauth2.initTokenClient({
-              client_id: this.CLIENT_ID,
-              scope: this.SCOPES,
-              callback: (response) => {
-                if (response.access_token) {
-                  gapi.client.setToken(response);
-                  localStorage.setItem('googleDriveToken', JSON.stringify(response));
-                  this.isSignedIn = true;
-                  resolve(true);
-                } else {
-                  resolve(false);
-                }
-              },
-            });
-            
-            tokenClient.requestAccessToken({ prompt: 'consent' });
+            setTimeout(() => resolve(this.isSignedIn), 1000);
           });
         } catch (error) {
           console.error('Sign in error:', error);
@@ -1621,17 +1640,12 @@
             throw new Error('Not signed in to Google Drive');
           }
           
-          const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-            headers: {
-              'Authorization': `Bearer ${gapi.client.getToken().access_token}`
-            }
+          const response = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: 'media'
           });
           
-          if (!response.ok) {
-            throw new Error(`Failed to download backup: ${response.statusText}`);
-          }
-          
-          return await response.json();
+          return response.result;
         } catch (error) {
           console.error('Restore error:', error);
           throw error;
@@ -1807,75 +1821,158 @@
         XLSX.writeFile(workbook, 'Stock_Import_Template.xlsx');
       },
       
-      exportToWord: (htmlContent, filename = 'Report') => {
-        const preHtml = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>${filename}</title><style>body { font-family: Arial, sans-serif; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #ddd; padding: 8px; text-align: left; } th { background-color: #f2f2f2; font-weight: bold; } .header { text-align: center; margin-bottom: 20px; } .footer { margin-top: 30px; text-align: center; font-size: 12px; color: #666; }</style></head><body>`;
-        const postHtml = `</body></html>`;
-        
-        const fullHtml = preHtml + htmlContent + postHtml;
-        
-        const blob = new Blob(['\ufeff', fullHtml], {
-          type: 'application/msword'
-        });
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${filename}_${new Date().toISOString().split('T')[0]}.doc`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      },
-      
-      generateReportHTML: (title, headers, data, filters = {}) => {
-        let html = `<div class="header">
-          <h1>${title}</h1>
-          <p>Generated: ${new Date().toLocaleString()}</p>`;
-        
-        if (filters.status) {
-          html += `<p>Filter: ${filters.status}</p>`;
-        }
-        if (filters.startDate && filters.endDate) {
-          html += `<p>Date Range: ${new Date(filters.startDate).toLocaleDateString()} to ${new Date(filters.endDate).toLocaleDateString()}</p>`;
-        }
-        
-        html += `</div>`;
-        
-        html += `<table>
-          <thead>
-            <tr>`;
-        
-        headers.forEach(header => {
-          html += `<th>${header}</th>`;
-        });
-        
-        html += `</tr>
-          </thead>
-          <tbody>`;
-        
-        data.forEach(row => {
-          html += `<tr>`;
-          row.forEach(cell => {
-            html += `<td>${cell}</td>`;
+      exportToWord: (data, title, columns, filename = 'Report.docx') => {
+        try {
+          const { Document, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel } = window.docx;
+          
+          // Create header
+          const headerParagraph = new Paragraph({
+            children: [
+              new TextRun({
+                text: 'DUR AHAFO STORES MANAGEMENT SYSTEM',
+                bold: true,
+                size: 32,
+                color: '1a237e'
+              })
+            ],
+            heading: HeadingLevel.TITLE,
+            alignment: 'center',
+            spacing: { after: 400 }
           });
-          html += `</tr>`;
-        });
-        
-        html += `</tbody>
-        </table>
-        <div class="footer">
-          <p>DUR Ahafo Stores Management System - Confidential</p>
-          <p>Generated by: System Administrator</p>
-        </div>`;
-        
-        return html;
+          
+          const titleParagraph = new Paragraph({
+            children: [
+              new TextRun({
+                text: title,
+                bold: true,
+                size: 28,
+                color: '283593'
+              })
+            ],
+            heading: HeadingLevel.HEADING_1,
+            alignment: 'center',
+            spacing: { after: 300 }
+          });
+          
+          const dateParagraph = new Paragraph({
+            children: [
+              new TextRun({
+                text: `Generated on: ${new Date().toLocaleDateString('en-GH', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}`,
+                italic: true,
+                size: 22,
+                color: '666666'
+              })
+            ],
+            alignment: 'center',
+            spacing: { after: 400 }
+          });
+          
+          // Create table rows
+          const tableRows = [
+            new TableRow({
+              children: columns.map(col => 
+                new TableCell({
+                  children: [new Paragraph({
+                    children: [new TextRun({
+                      text: col,
+                      bold: true,
+                      color: 'ffffff',
+                      size: 20
+                    })],
+                    alignment: 'center'
+                  })],
+                  shading: {
+                    fill: '1a237e'
+                  }
+                })
+              ),
+              tableHeader: true
+            }),
+            ...data.map(row => 
+              new TableRow({
+                children: columns.map(col => 
+                  new TableCell({
+                    children: [new Paragraph({
+                      children: [new TextRun({
+                        text: String(row[col] || ''),
+                        size: 18
+                      })],
+                      alignment: 'left'
+                    })]
+                  })
+                )
+              })
+            )
+          ];
+          
+          // Create summary paragraph if it's a stock report
+          let summaryParagraph;
+          if (title.includes('Stock')) {
+            const totalItems = data.length;
+            const totalValue = data.reduce((sum, item) => {
+              const value = parseFloat(item['Current Inventory Value (GH¢)']?.replace(/[^\d.-]/g, '') || 0);
+              return sum + value;
+            }, 0);
+            
+            summaryParagraph = new Paragraph({
+              children: [
+                new TextRun({
+                  text: `Total Items: ${totalItems} | Total Inventory Value: ${helpers.formatCurrency(totalValue)}`,
+                  bold: true,
+                  size: 22,
+                  color: '27ae60'
+                })
+              ],
+              spacing: { before: 300, after: 300 }
+            });
+          }
+          
+          // Create document
+          const doc = new Document({
+            sections: [{
+              properties: {},
+              children: [
+                headerParagraph,
+                titleParagraph,
+                dateParagraph,
+                summaryParagraph,
+                new Paragraph({
+                  children: [new TextRun({ text: '' })],
+                  spacing: { after: 200 }
+                }),
+                new Table({
+                  rows: tableRows,
+                  width: {
+                    size: 100,
+                    type: 'pct'
+                  }
+                })
+              ]
+            }]
+          });
+          
+          // Save document
+          window.docx.Packer.toBlob(doc).then(blob => {
+            saveAs(blob, filename);
+          });
+          
+        } catch (error) {
+          console.error('Error generating Word document:', error);
+          alert('Error exporting to Word. Please try again.');
+        }
       }
     };
     
     // ================= INITIALIZE DATABASE =================
     async function initializeDatabase() {
       try {
-        // Open database
+        // Clear any existing data and start fresh
         await db.open();
         
         // Check if users exist
@@ -1886,13 +1983,13 @@
           await db.users.bulkAdd([
             { 
               username: "storekeeper", 
-              password: "Store123", 
+              password: "123456", 
               role: "STOREKEEPER", 
               name: "Store Manager" 
             },
             { 
               username: "supervisor", 
-              password: "Super123", 
+              password: "123456", 
               role: "SUPERVISOR", 
               name: "Supervisor" 
             },
@@ -2225,14 +2322,6 @@
                 >
                   <span>🔄</span> Refresh Backups
                 </button>
-                
-                <button 
-                  className="btn btn-logout"
-                  onClick={handleSignOut}
-                  disabled={driveStatus.loading}
-                >
-                  <span>🚪</span> Sign Out
-                </button>
               </div>
               
               {backups.length > 0 && (
@@ -2302,6 +2391,122 @@
       );
     }
     
+    // ================= REPORT FILTERS COMPONENT =================
+    function ReportFilters({ filters, setFilters, reportType }) {
+      const statusOptions = [
+        { value: 'OUT', label: 'Out of Stock', color: '#e74c3c' },
+        { value: 'LOW', label: 'Low Stock', color: '#f1c40f' },
+        { value: 'OK', label: 'In Stock', color: '#2ecc71' }
+      ];
+      
+      const toggleStatus = (status) => {
+        const currentStatuses = filters.status || [];
+        if (currentStatuses.includes(status)) {
+          setFilters({
+            ...filters,
+            status: currentStatuses.filter(s => s !== status)
+          });
+        } else {
+          setFilters({
+            ...filters,
+            status: [...currentStatuses, status]
+          });
+        }
+      };
+      
+      const clearFilters = () => {
+        setFilters({
+          status: [],
+          startDate: '',
+          endDate: ''
+        });
+      };
+      
+      return (
+        <div className="filter-section">
+          <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Filter Options</h4>
+          
+          <div className="report-filters">
+            <div className="filter-group">
+              <label>Stock Status</label>
+              <div className="multi-select">
+                {statusOptions.map(option => (
+                  <div
+                    key={option.value}
+                    className={`filter-chip ${(filters.status || []).includes(option.value) ? 'active' : ''}`}
+                    onClick={() => toggleStatus(option.value)}
+                    style={{
+                      borderColor: (filters.status || []).includes(option.value) ? option.color : '#dee2e6'
+                    }}
+                  >
+                    <span>{(filters.status || []).includes(option.value) ? '✓' : '○'}</span>
+                    <span>{option.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="filter-group">
+              <label>Date Range</label>
+              <div className="date-range-picker">
+                <div className="form-group">
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={filters.startDate}
+                    onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+                  />
+                </div>
+                <span>to</span>
+                <div className="form-group">
+                  <input
+                    type="date"
+                    className="form-control"
+                    value={filters.endDate}
+                    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {(filters.status?.length > 0 || filters.startDate || filters.endDate) && (
+            <div style={{ marginTop: '20px' }}>
+              <div className="multi-select">
+                {filters.status?.map(status => {
+                  const option = statusOptions.find(o => o.value === status);
+                  return (
+                    <span key={status} className="filter-tag">
+                      <span>{option?.label}</span>
+                      <span className="remove" onClick={() => toggleStatus(status)}>×</span>
+                    </span>
+                  );
+                })}
+                {filters.startDate && (
+                  <span className="filter-tag">
+                    <span>From: {new Date(filters.startDate).toLocaleDateString()}</span>
+                    <span className="remove" onClick={() => setFilters({ ...filters, startDate: '' })}>×</span>
+                  </span>
+                )}
+                {filters.endDate && (
+                  <span className="filter-tag">
+                    <span>To: {new Date(filters.endDate).toLocaleDateString()}</span>
+                    <span className="remove" onClick={() => setFilters({ ...filters, endDate: '' })}>×</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <div style={{ marginTop: '20px' }}>
+            <button onClick={clearFilters} className="btn" style={{ padding: '8px 16px', fontSize: '14px' }}>
+              <span>🗑️</span> Clear Filters
+            </button>
+          </div>
+        </div>
+      );
+    }
+    
     // ================= MAIN APP COMPONENT =================
     function App() {
       const [isLoading, setIsLoading] = React.useState(true);
@@ -2327,10 +2532,8 @@
       const [showBackupModal, setShowBackupModal] = React.useState(false);
       const [lastSync, setLastSync] = React.useState(null);
       const [driveStatus, setDriveStatus] = React.useState({
-        initialized: false,
-        signedIn: false,
-        loading: false,
-        message: ''
+        connected: false,
+        loading: false
       });
       
       React.useEffect(() => {
@@ -2352,31 +2555,12 @@
             const calculatedStats = helpers.calculateStats(productList, movementList);
             setStats(calculatedStats);
             
-            // Initialize Google Drive
-            setDriveStatus(prev => ({ ...prev, loading: true, message: 'Connecting to Google Drive...' }));
-            const driveInitialized = await GoogleDriveManager.init();
-            
-            setDriveStatus({
-              initialized: driveInitialized,
-              signedIn: GoogleDriveManager.isSignedIn,
-              loading: false,
-              message: driveInitialized ? 
-                (GoogleDriveManager.isSignedIn ? 'Connected to Google Drive' : 'Google Drive ready') : 
-                'Google Drive unavailable'
-            });
-            
             setIsLoading(false);
             console.log("App initialized successfully");
           } catch (error) {
             console.error("App initialization error:", error);
             showAlert('Failed to initialize application', 'error');
             setIsLoading(false);
-            setDriveStatus({
-              initialized: false,
-              signedIn: false,
-              loading: false,
-              message: 'Google Drive connection failed'
-            });
           }
         };
         
@@ -2426,37 +2610,59 @@
       const handleLogin = async (e) => {
         e.preventDefault();
         try {
-          console.log("Login attempt for:", loginData.username);
+          setDriveStatus({ connected: false, loading: true });
           
           // Get all users
           const allUsers = await db.users.toArray();
-          console.log("Available users:", allUsers.map(u => u.username));
           
           // Find user
-          const foundUser = allUsers.find(u => u.username === loginData.username);
+          const foundUser = allUsers.find(u => 
+            u.username.toLowerCase() === loginData.username.toLowerCase()
+          );
           
           if (!foundUser) {
-            showAlert('Invalid username or password', 'error');
+            showAlert('User not found', 'error');
+            setDriveStatus({ connected: false, loading: false });
             return;
           }
           
           if (foundUser.password !== loginData.password) {
-            showAlert('Invalid username or password', 'error');
+            showAlert('Incorrect password', 'error');
+            setDriveStatus({ connected: false, loading: false });
             return;
+          }
+          
+          // Initialize Google Drive
+          try {
+            const driveInitialized = await GoogleDriveManager.init();
+            if (driveInitialized) {
+              setDriveStatus({ connected: GoogleDriveManager.isSignedIn, loading: false });
+              if (GoogleDriveManager.isSignedIn) {
+                showAlert('✓ Connected to Google Drive', 'success');
+              }
+            } else {
+              setDriveStatus({ connected: false, loading: false });
+            }
+          } catch (driveError) {
+            console.error('Google Drive initialization error:', driveError);
+            setDriveStatus({ connected: false, loading: false });
           }
           
           setUser(foundUser);
           showAlert(`Welcome back, ${foundUser.name}!`, 'success');
           setActiveView('dashboard');
+          
         } catch (error) {
           console.error("Login error:", error);
           showAlert('Login failed. Please try again.', 'error');
+          setDriveStatus({ connected: false, loading: false });
         }
       };
       
       const logout = () => {
         setUser(null);
         setLoginData({ username: '', password: '' });
+        setDriveStatus({ connected: false, loading: false });
         showAlert('Logged out successfully', 'success');
       };
       
@@ -2679,75 +2885,15 @@
         }
       };
       
-      const exportToExcel = (reportType, filters = {}) => {
+      const exportToExcel = (reportType, filteredData) => {
         try {
-          let reportData = [];
+          let reportData = filteredData || [];
           let fileName = '';
           
           if (reportType === 'stock') {
-            reportData = products
-              .filter(product => {
-                const status = helpers.getProductStatus(product.id, products, movements);
-                if (filters.status === 'out-of-stock') return status === 'OUT';
-                if (filters.status === 'low-stock') return status === 'LOW';
-                if (filters.status === 'in-stock') return status === 'OK';
-                return true;
-              })
-              .map(product => {
-                const stock = helpers.getProductBalance(product.id, movements);
-                const status = helpers.getProductStatus(product.id, products, movements);
-                const costData = helpers.calculateProductCost(product.id, movements);
-                
-                return {
-                  'Product ID': product.id,
-                  'Product Name': product.name,
-                  'Unit': product.unit,
-                  'Current Stock': stock,
-                  'Reorder Level': product.reorderLevel,
-                  'Total Cost of Purchases (GH¢)': costData.totalCost,
-                  'Average Unit Cost (GH¢)': costData.averageUnitCost.toFixed(2),
-                  'Current Inventory Value (GH¢)': costData.currentValue.toFixed(2),
-                  'Status': status
-                };
-              });
-            
             fileName = `Stock_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
           } 
           else if (reportType === 'transactions') {
-            const filteredMovements = movements.filter(movement => {
-              if (filters.startDate) {
-                const movementDate = new Date(movement.date);
-                const startDate = new Date(filters.startDate);
-                if (movementDate < startDate) return false;
-              }
-              
-              if (filters.endDate) {
-                const movementDate = new Date(movement.date);
-                const endDate = new Date(filters.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                if (movementDate > endDate) return false;
-              }
-              
-              return true;
-            });
-            
-            reportData = filteredMovements.map(movement => {
-              const product = products.find(p => p.id === movement.productId);
-              const userObj = users.find(u => u.id === movement.userId);
-              
-              return {
-                'Date': helpers.formatDateShort(movement.date),
-                'Product': product ? product.name : `Product ${movement.productId}`,
-                'Type': movement.type === 'IN' ? 'Receipt' : 'Issue',
-                'Quantity': movement.quantity,
-                'Unit Cost (GH¢)': movement.unitCost || 0,
-                'Total Value (GH¢)': movement.totalValue || 0,
-                'Reference': movement.reference || '-',
-                'User': userObj ? userObj.name : `User ${movement.userId}`,
-                'Import Batch': movement.importBatch || '-'
-              };
-            });
-            
             fileName = `Transaction_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
           }
           
@@ -2756,92 +2902,56 @@
           XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
           XLSX.writeFile(workbook, fileName);
           
-          showAlert('Report exported successfully to Excel', 'success');
+          showAlert('Report exported to Excel successfully', 'success');
         } catch (error) {
           console.error("Export error:", error);
           showAlert('Error exporting report', 'error');
         }
       };
       
-      const exportToWord = (reportType, filters = {}) => {
+      const exportToWord = (reportType, filteredData) => {
         try {
-          let headers = [];
-          let data = [];
+          let reportData = filteredData || [];
           let title = '';
+          let columns = [];
           
           if (reportType === 'stock') {
-            title = 'Stock Report - DUR Ahafo Stores';
-            headers = ['Product', 'Unit', 'Current Stock', 'Reorder Level', 'Total Cost of Purchases (GH¢)', 'Average Unit Cost (GH¢)', 'Current Inventory Value (GH¢)', 'Status'];
+            title = 'Stock Status Report';
+            columns = ['Product', 'Unit', 'Current Stock', 'Reorder Level', 'Total Cost of Purchases (GH¢)', 'Average Unit Cost (GH¢)', 'Current Inventory Value (GH¢)', 'Status'];
             
-            const filteredProducts = products
-              .filter(product => {
-                const status = helpers.getProductStatus(product.id, products, movements);
-                if (filters.status === 'out-of-stock') return status === 'OUT';
-                if (filters.status === 'low-stock') return status === 'LOW';
-                if (filters.status === 'in-stock') return status === 'OK';
-                return true;
-              });
+            const wordData = reportData.map(item => ({
+              'Product': item.name,
+              'Unit': item.unit,
+              'Current Stock': item.currentStock,
+              'Reorder Level': item.reorderLevel,
+              'Total Cost of Purchases (GH¢)': helpers.formatCurrency(item.totalCost),
+              'Average Unit Cost (GH¢)': helpers.formatCurrency(item.averageUnitCost),
+              'Current Inventory Value (GH¢)': helpers.formatCurrency(item.currentValue),
+              'Status': item.status === 'OUT' ? 'Out of Stock' : item.status === 'LOW' ? 'Low Stock' : 'In Stock'
+            }));
             
-            data = filteredProducts.map(product => {
-              const stock = helpers.getProductBalance(product.id, movements);
-              const status = helpers.getProductStatus(product.id, products, movements);
-              const costData = helpers.calculateProductCost(product.id, movements);
-              
-              return [
-                product.name,
-                product.unit,
-                stock.toString(),
-                product.reorderLevel.toString(),
-                helpers.formatCurrency(costData.totalCost),
-                helpers.formatCurrency(costData.averageUnitCost),
-                helpers.formatCurrency(costData.currentValue),
-                status === 'OUT' ? 'Out of Stock' : 
-                status === 'LOW' ? 'Low Stock' : 'In Stock'
-              ];
-            });
+            helpers.exportToWord(wordData, title, columns, `Stock_Report_${new Date().toISOString().split('T')[0]}.docx`);
           } 
           else if (reportType === 'transactions') {
-            title = 'Transaction Report - DUR Ahafo Stores';
-            headers = ['Date', 'Product', 'Type', 'Quantity', 'Unit Cost (GH¢)', 'Total Value (GH¢)', 'Reference', 'User'];
+            title = 'Transaction Report';
+            columns = ['Date', 'Product', 'Type', 'Quantity', 'Unit Cost (GH¢)', 'Total Value (GH¢)', 'Reference', 'User', 'Import Batch'];
             
-            const filteredMovements = movements.filter(movement => {
-              if (filters.startDate) {
-                const movementDate = new Date(movement.date);
-                const startDate = new Date(filters.startDate);
-                if (movementDate < startDate) return false;
-              }
-              
-              if (filters.endDate) {
-                const movementDate = new Date(movement.date);
-                const endDate = new Date(filters.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                if (movementDate > endDate) return false;
-              }
-              
-              return true;
-            });
+            const wordData = reportData.map(item => ({
+              'Date': helpers.formatDateShort(item.date),
+              'Product': item.productName,
+              'Type': item.type === 'IN' ? 'Receipt' : 'Issue',
+              'Quantity': item.quantity,
+              'Unit Cost (GH¢)': helpers.formatCurrency(item.unitCost || 0),
+              'Total Value (GH¢)': helpers.formatCurrency(item.totalValue || 0),
+              'Reference': item.reference || '-',
+              'User': item.userName || `User ${item.userId}`,
+              'Import Batch': item.importBatch || '-'
+            }));
             
-            data = filteredMovements.map(movement => {
-              const product = products.find(p => p.id === movement.productId);
-              const userObj = users.find(u => u.id === movement.userId);
-              
-              return [
-                helpers.formatDateShort(movement.date),
-                product ? product.name : `Product ${movement.productId}`,
-                movement.type === 'IN' ? 'Receipt' : 'Issue',
-                movement.quantity.toString(),
-                helpers.formatCurrency(movement.unitCost || 0),
-                helpers.formatCurrency(movement.totalValue || 0),
-                movement.reference || '-',
-                userObj ? userObj.name : `User ${movement.userId}`
-              ];
-            });
+            helpers.exportToWord(wordData, title, columns, `Transaction_Report_${new Date().toISOString().split('T')[0]}.docx`);
           }
           
-          const html = helpers.generateReportHTML(title, headers, data, filters);
-          helpers.exportToWord(html, title.replace(' - ', '_'));
-          
-          showAlert('Report exported successfully to Word', 'success');
+          showAlert('Report exported to Word successfully', 'success');
         } catch (error) {
           console.error("Word export error:", error);
           showAlert('Error exporting to Word', 'error');
@@ -2857,13 +2967,6 @@
           <div className="login-container">
             <div className="login-box">
               <h2><span style={{ background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span> DUR Ahafo Stores Management System</h2>
-              
-              {driveStatus.message && (
-                <div className={`login-status ${driveStatus.loading ? 'connecting' : driveStatus.initialized ? 'connected' : 'error'}`}>
-                  {driveStatus.loading ? '⏳' : driveStatus.initialized ? '✅' : '⚠️'}
-                  {driveStatus.message}
-                </div>
-              )}
               
               {alert.show && (
                 <div className={`alert alert-${alert.type}`}>
@@ -2884,6 +2987,7 @@
                     value={loginData.username}
                     onChange={(e) => setLoginData({...loginData, username: e.target.value})}
                     required
+                    autoComplete="username"
                   />
                 </div>
                 
@@ -2896,6 +3000,7 @@
                     value={loginData.password}
                     onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     required
+                    autoComplete="current-password"
                   />
                 </div>
                 
@@ -2907,11 +3012,18 @@
               <div style={{ marginTop: '25px', padding: '20px', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: '12px', border: '2px solid #e0e0e0' }}>
                 <h4 style={{ fontSize: '16px', color: '#1a237e', marginBottom: '15px', fontWeight: '600' }}>Demo Credentials:</h4>
                 <div style={{ fontSize: '14px', color: '#666' }}>
-                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / Store123</p>
-                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / Super123</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / 123456</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / 123456</p>
                   <p style={{ marginBottom: '8px' }}><strong>Admin:</strong> admin / Admin123</p>
                 </div>
               </div>
+              
+              {driveStatus.loading && (
+                <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                  <div className="loading-spinner" style={{ width: '30px', height: '30px', margin: '0 auto' }}></div>
+                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>Connecting to Google Drive...</p>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -2930,6 +3042,19 @@
               <div className="user-info">
                 <span>Welcome, <strong style={{ color: '#4ecdc4' }}>{user.name}</strong></span>
                 <span className="user-badge">{user.role}</span>
+                
+                {driveStatus.connected ? (
+                  <span className="drive-status-indicator drive-connected">
+                    <div className="drive-status-dot"></div>
+                    <span>Drive Connected</span>
+                  </span>
+                ) : (
+                  <span className="drive-status-indicator drive-disconnected">
+                    <div className="drive-status-dot"></div>
+                    <span>Drive Offline</span>
+                  </span>
+                )}
+                
                 <button 
                   className="btn btn-change-password" 
                   onClick={() => setShowChangePasswordModal(true)}
@@ -3000,7 +3125,7 @@
                 <button 
                   className={`nav-btn history ${activeView === 'history' ? 'active' : ''}`}
                   onClick={() => setActiveView('history')}
-                >
+                  >
                   <span>📋</span> History
                 </button>
                 
@@ -3070,7 +3195,7 @@
               )}
               
               {activeView === 'reports' && (
-                <Reports 
+                <EnhancedReports 
                   products={products}
                   movements={movements}
                   users={users}
@@ -3212,63 +3337,56 @@
             </div>
           </div>
           
-          {/* Low Stock Alerts */}
-          {stats.lowStock > 0 && (
-            <div className="card">
-              <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⚠️</span> Low Stock Alerts</h3>
-              <div className="dashboard-table-container">
-                <table className="dashboard-table">
-                  <thead>
-                    <tr>
-                      <th>Product</th>
-                      <th>Unit</th>
-                      <th>Current Stock</th>
-                      <th>Reorder Level</th>
-                      <th>Total Cost of Purchases (GH¢)</th>
-                      <th>Average Unit Cost (GH¢)</th>
-                      <th>Current Inventory Value (GH¢)</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products
-                      .filter(product => {
-                        const status = helpers.getProductStatus(product.id, products, movements);
-                        return status === 'LOW';
-                      })
-                      .map(product => {
-                        const stock = helpers.getProductBalance(product.id, movements);
-                        const status = helpers.getProductStatus(product.id, products, movements);
-                        const costData = helpers.calculateProductCost(product.id, movements);
-                        
-                        return (
-                          <tr key={product.id}>
-                            <td><strong>{product.name}</strong></td>
-                            <td>{product.unit}</td>
-                            <td style={{ color: '#f39c12', fontWeight: 'bold' }}>{stock}</td>
-                            <td>{product.reorderLevel}</td>
-                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
-                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
-                            <td>{helpers.formatCurrency(costData.currentValue)}</td>
-                            <td>
-                              <span className="status-badge status-low">
-                                ⚠️ Low Stock
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </tbody>
-                </table>
-              </div>
+          {/* Stock Status Table */}
+          <div className="card">
+            <h3><span style={{ background: 'linear-gradient(135deg, #4ecdc4, #2ecc71)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📊</span> Current Stock Status</h3>
+            <div className="table-container dashboard-recent-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Unit</th>
+                    <th>Current Stock</th>
+                    <th>Reorder Level</th>
+                    <th>Total Cost of Purchases (GH¢)</th>
+                    <th>Average Unit Cost (GH¢)</th>
+                    <th>Current Inventory Value (GH¢)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.slice(0, 10).map(product => {
+                    const stock = helpers.getProductBalance(product.id, movements);
+                    const costData = helpers.calculateProductCost(product.id, movements);
+                    
+                    return (
+                      <tr key={product.id}>
+                        <td><strong>{product.name}</strong></td>
+                        <td>{product.unit}</td>
+                        <td style={{ 
+                          fontWeight: 'bold',
+                          color: stock === 0 ? '#e74c3c' : stock <= product.reorderLevel ? '#f39c12' : '#27ae60'
+                        }}>
+                          {stock}
+                        </td>
+                        <td>{product.reorderLevel}</td>
+                        <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                        <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                        <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                          {helpers.formatCurrency(costData.currentValue)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
           
           {/* Recent Transactions */}
           <div className="card">
             <h3><span style={{ background: 'linear-gradient(135deg, #4ecdc4, #2ecc71)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🔄</span> Recent Transactions</h3>
-            <div className="dashboard-table-container">
-              <table className="dashboard-table">
+            <div className="table-container">
+              <table>
                 <thead>
                   <tr>
                     <th>Date & Time</th>
@@ -3875,147 +3993,81 @@
       );
     }
     
-    // ================= REPORTS COMPONENT =================
-    function Reports({ products, movements, users, exportToExcel, exportToWord, helpers }) {
+    // ================= ENHANCED REPORTS COMPONENT =================
+    function EnhancedReports({ products, movements, users, exportToExcel, exportToWord, helpers }) {
       const [reportType, setReportType] = React.useState('stock');
       const [filters, setFilters] = React.useState({
-        status: '',
+        status: [],
         startDate: '',
         endDate: ''
       });
       
-      const handleExportExcel = () => {
-        exportToExcel(reportType, filters);
-      };
-      
-      const handleExportWord = () => {
-        exportToWord(reportType, filters);
-      };
-      
-      const handleFilterChange = (filterType, value) => {
-        setFilters(prev => ({
-          ...prev,
-          [filterType]: value
-        }));
-      };
-      
-      const clearFilters = () => {
-        setFilters({
-          status: '',
-          startDate: '',
-          endDate: ''
-        });
-      };
-      
-      const renderReportContent = () => {
-        switch(reportType) {
-          case 'stock':
-            const filteredProducts = products.filter(product => {
+      const filterData = () => {
+        if (reportType === 'stock') {
+          let filteredProducts = [...products];
+          
+          // Filter by status
+          if (filters.status && filters.status.length > 0) {
+            filteredProducts = filteredProducts.filter(product => {
               const status = helpers.getProductStatus(product.id, products, movements);
-              if (filters.status === 'out-of-stock') return status === 'OUT';
-              if (filters.status === 'low-stock') return status === 'LOW';
-              if (filters.status === 'in-stock') return status === 'OK';
+              return filters.status.includes(status);
+            });
+          }
+          
+          // Filter by date range (based on last movement)
+          if (filters.startDate || filters.endDate) {
+            filteredProducts = filteredProducts.filter(product => {
+              const productMovements = movements.filter(m => m.productId === product.id);
+              if (productMovements.length === 0) return true;
+              
+              const lastMovementDate = new Date(productMovements[productMovements.length - 1].date);
+              
+              if (filters.startDate) {
+                const startDate = new Date(filters.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                if (lastMovementDate < startDate) return false;
+              }
+              
+              if (filters.endDate) {
+                const endDate = new Date(filters.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                if (lastMovementDate > endDate) return false;
+              }
+              
               return true;
             });
+          }
+          
+          return filteredProducts.map(product => {
+            const stock = helpers.getProductBalance(product.id, movements);
+            const status = helpers.getProductStatus(product.id, products, movements);
+            const costData = helpers.calculateProductCost(product.id, movements);
             
-            return (
-              <>
-                <div className="report-filters">
-                  <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Filter Options</h4>
-                  <div className="filter-row">
-                    <div className="filter-group">
-                      <label>Stock Status</label>
-                      <div className="status-filter-buttons">
-                        <button 
-                          className={`status-filter-btn out-of-stock ${filters.status === 'out-of-stock' ? 'active' : ''}`}
-                          onClick={() => handleFilterChange('status', filters.status === 'out-of-stock' ? '' : 'out-of-stock')}
-                        >
-                          🛑 Out of Stock
-                        </button>
-                        <button 
-                          className={`status-filter-btn low-stock ${filters.status === 'low-stock' ? 'active' : ''}`}
-                          onClick={() => handleFilterChange('status', filters.status === 'low-stock' ? '' : 'low-stock')}
-                        >
-                          ⚠️ Low Stock
-                        </button>
-                        <button 
-                          className={`status-filter-btn in-stock ${filters.status === 'in-stock' ? 'active' : ''}`}
-                          onClick={() => handleFilterChange('status', filters.status === 'in-stock' ? '' : 'in-stock')}
-                        >
-                          ✅ In Stock
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: '15px' }}>
-                    <button className="btn btn-filter" onClick={clearFilters}>
-                      Clear Filters
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Product</th>
-                        <th>Unit</th>
-                        <th>Current Stock</th>
-                        <th>Reorder Level</th>
-                        <th>Total Cost of Purchases (GH¢)</th>
-                        <th>Average Unit Cost (GH¢)</th>
-                        <th>Current Inventory Value (GH¢)</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredProducts.map(product => {
-                        const stock = helpers.getProductBalance(product.id, movements);
-                        const status = helpers.getProductStatus(product.id, products, movements);
-                        const costData = helpers.calculateProductCost(product.id, movements);
-                        
-                        return (
-                          <tr key={product.id}>
-                            <td><strong>{product.name}</strong></td>
-                            <td>{product.unit}</td>
-                            <td style={{ fontWeight: 'bold' }}>{stock}</td>
-                            <td>{product.reorderLevel}</td>
-                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
-                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
-                            <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
-                              {helpers.formatCurrency(costData.currentValue)}
-                            </td>
-                            <td>
-                              <span className={`status-badge status-${status.toLowerCase()}`}>
-                                {status === 'OUT' ? '🛑 Out of Stock' : 
-                                 status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  
-                  {filteredProducts.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                      No products found matching the filters.
-                    </div>
-                  )}
-                </div>
-              </>
-            );
-            
-          case 'transactions':
-            const filteredMovements = movements.filter(movement => {
+            return {
+              ...product,
+              currentStock: stock,
+              status: status,
+              totalCost: costData.totalCost,
+              averageUnitCost: costData.averageUnitCost,
+              currentValue: costData.currentValue
+            };
+          });
+        } 
+        else if (reportType === 'transactions') {
+          let filteredMovements = [...movements];
+          
+          // Filter by date range
+          if (filters.startDate || filters.endDate) {
+            filteredMovements = filteredMovements.filter(movement => {
+              const movementDate = new Date(movement.date);
+              
               if (filters.startDate) {
-                const movementDate = new Date(movement.date);
                 const startDate = new Date(filters.startDate);
+                startDate.setHours(0, 0, 0, 0);
                 if (movementDate < startDate) return false;
               }
               
               if (filters.endDate) {
-                const movementDate = new Date(movement.date);
                 const endDate = new Date(filters.endDate);
                 endDate.setHours(23, 59, 59, 999);
                 if (movementDate > endDate) return false;
@@ -4023,106 +4075,73 @@
               
               return true;
             });
+          }
+          
+          // Filter by current stock status
+          if (filters.status && filters.status.length > 0) {
+            filteredMovements = filteredMovements.filter(movement => {
+              const product = products.find(p => p.id === movement.productId);
+              if (!product) return false;
+              
+              const currentStatus = helpers.getProductStatus(product.id, products, movements);
+              return filters.status.includes(currentStatus);
+            });
+          }
+          
+          return filteredMovements.map(movement => {
+            const product = products.find(p => p.id === movement.productId);
+            const user = users.find(u => u.id === movement.userId);
             
-            return (
-              <>
-                <div className="report-filters">
-                  <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Filter Options</h4>
-                  <div className="filter-row">
-                    <div className="filter-group">
-                      <label>Date Range</label>
-                      <div className="form-row" style={{ margin: 0 }}>
-                        <div className="form-group" style={{ flex: 1 }}>
-                          <input
-                            type="date"
-                            className="form-control"
-                            placeholder="Start Date"
-                            value={filters.startDate}
-                            onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                          />
-                        </div>
-                        <div className="form-group" style={{ flex: 1 }}>
-                          <input
-                            type="date"
-                            className="form-control"
-                            placeholder="End Date"
-                            value={filters.endDate}
-                            onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div style={{ marginTop: '15px' }}>
-                    <button className="btn btn-filter" onClick={clearFilters}>
-                      Clear Filters
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Product</th>
-                        <th>Type</th>
-                        <th>Quantity</th>
-                        <th>Unit Cost (GH¢)</th>
-                        <th>Total Value (GH¢)</th>
-                        <th>Reference</th>
-                        <th>User</th>
-                        <th>Import Batch</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredMovements.map(movement => {
-                        const product = products.find(p => p.id === movement.productId);
-                        const user = users.find(u => u.id === movement.userId);
-                        
-                        return (
-                          <tr key={movement.id}>
-                            <td>{helpers.formatDateShort(movement.date)}</td>
-                            <td>{product ? product.name : `Product ${movement.productId}`}</td>
-                            <td>
-                              <span style={{
-                                color: movement.type === 'IN' ? '#27ae60' : '#e74c3c',
-                                fontWeight: 'bold'
-                              }}>
-                                {movement.type === 'IN' ? 'Receipt' : 'Issue'}
-                              </span>
-                            </td>
-                            <td>{movement.quantity}</td>
-                            <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
-                            <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
-                              {helpers.formatCurrency(movement.totalValue || 0)}
-                            </td>
-                            <td>{movement.reference || '-'}</td>
-                            <td>{user ? user.name : `User ${movement.userId}`}</td>
-                            <td>{movement.importBatch || '-'}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  
-                  {filteredMovements.length === 0 && (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
-                      No transactions found matching the filters.
-                    </div>
-                  )}
-                </div>
-              </>
-            );
-            
-          default:
-            return <div>Select a report type</div>;
+            return {
+              ...movement,
+              productName: product ? product.name : `Product ${movement.productId}`,
+              userName: user ? user.name : `User ${movement.userId}`
+            };
+          }).reverse();
         }
+        
+        return [];
+      };
+      
+      const filteredData = filterData();
+      
+      const handleExportExcel = () => {
+        if (reportType === 'stock') {
+          const excelData = filteredData.map(item => ({
+            'Product ID': item.id,
+            'Product Name': item.name,
+            'Unit': item.unit,
+            'Current Stock': item.currentStock,
+            'Reorder Level': item.reorderLevel,
+            'Total Cost of Purchases (GH¢)': item.totalCost,
+            'Average Unit Cost (GH¢)': item.averageUnitCost,
+            'Current Inventory Value (GH¢)': item.currentValue,
+            'Status': item.status === 'OUT' ? 'Out of Stock' : item.status === 'LOW' ? 'Low Stock' : 'In Stock'
+          }));
+          exportToExcel('stock', excelData);
+        } else if (reportType === 'transactions') {
+          const excelData = filteredData.map(item => ({
+            'Date': helpers.formatDateShort(item.date),
+            'Product': item.productName,
+            'Type': item.type === 'IN' ? 'Receipt' : 'Issue',
+            'Quantity': item.quantity,
+            'Unit Cost (GH¢)': item.unitCost || 0,
+            'Total Value (GH¢)': item.totalValue || 0,
+            'Reference': item.reference || '-',
+            'User': item.userName || `User ${item.userId}`,
+            'Import Batch': item.importBatch || '-'
+          }));
+          exportToExcel('transactions', excelData);
+        }
+      };
+      
+      const handleExportWord = () => {
+        exportToWord(reportType, filteredData);
       };
       
       return (
         <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📈</span> Reports</h3>
+          <h3><span style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📈</span> Advanced Reports</h3>
           
           <div className="report-type-selector">
             <button 
@@ -4139,24 +4158,144 @@
             </button>
           </div>
           
+          <ReportFilters 
+            filters={filters}
+            setFilters={setFilters}
+            reportType={reportType}
+          />
+          
           <div className="report-controls">
             <button 
               className="btn btn-export"
               onClick={handleExportExcel}
+              disabled={filteredData.length === 0}
             >
               <span>📥</span> Export to Excel
             </button>
             <button 
-              className="btn btn-word"
+              className="btn btn-export-word"
               onClick={handleExportWord}
+              disabled={filteredData.length === 0}
             >
               <span>📄</span> Export to Word
             </button>
           </div>
           
-          {renderReportContent()}
+          <div style={{ marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '10px' }}>
+            <strong>Results:</strong> {filteredData.length} records found
+            {filters.startDate && (
+              <span style={{ marginLeft: '20px' }}>
+                <strong>From:</strong> {new Date(filters.startDate).toLocaleDateString()}
+              </span>
+            )}
+            {filters.endDate && (
+              <span style={{ marginLeft: '20px' }}>
+                <strong>To:</strong> {new Date(filters.endDate).toLocaleDateString()}
+              </span>
+            )}
+            {filters.status.length > 0 && (
+              <span style={{ marginLeft: '20px' }}>
+                <strong>Status:</strong> {filters.status.join(', ')}
+              </span>
+            )}
+          </div>
+          
+          {renderReportContent(reportType, filteredData, helpers, products)}
         </div>
       );
+    }
+    
+    function renderReportContent(reportType, filteredData, helpers, products) {
+      switch(reportType) {
+        case 'stock':
+          return (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Unit</th>
+                    <th>Current Stock</th>
+                    <th>Reorder Level</th>
+                    <th>Total Cost of Purchases (GH¢)</th>
+                    <th>Average Unit Cost (GH¢)</th>
+                    <th>Current Inventory Value (GH¢)</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.map(item => (
+                    <tr key={item.id}>
+                      <td><strong>{item.name}</strong></td>
+                      <td>{item.unit}</td>
+                      <td style={{ fontWeight: 'bold' }}>{item.currentStock}</td>
+                      <td>{item.reorderLevel}</td>
+                      <td>{helpers.formatCurrency(item.totalCost)}</td>
+                      <td>{helpers.formatCurrency(item.averageUnitCost)}</td>
+                      <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                        {helpers.formatCurrency(item.currentValue)}
+                      </td>
+                      <td>
+                        <span className={`status-badge status-${item.status.toLowerCase()}`}>
+                          {item.status === 'OUT' ? '🛑 Out of Stock' : 
+                           item.status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+          
+        case 'transactions':
+          return (
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Quantity</th>
+                    <th>Unit Cost (GH¢)</th>
+                    <th>Total Value (GH¢)</th>
+                    <th>Reference</th>
+                    <th>User</th>
+                    <th>Import Batch</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredData.map(item => (
+                    <tr key={item.id}>
+                      <td>{helpers.formatDateShort(item.date)}</td>
+                      <td>{item.productName}</td>
+                      <td>
+                        <span style={{
+                          color: item.type === 'IN' ? '#27ae60' : '#e74c3c',
+                          fontWeight: 'bold'
+                        }}>
+                          {item.type === 'IN' ? 'Receipt' : 'Issue'}
+                        </span>
+                      </td>
+                      <td>{item.quantity}</td>
+                      <td>{helpers.formatCurrency(item.unitCost || 0)}</td>
+                      <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
+                        {helpers.formatCurrency(item.totalValue || 0)}
+                      </td>
+                      <td>{item.reference || '-'}</td>
+                      <td>{item.userName || `User ${item.userId}`}</td>
+                      <td>{item.importBatch || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+          
+        default:
+          return <div>Select a report type</div>;
+      }
     }
     
     // ================= IMPORT MODAL =================

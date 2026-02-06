@@ -11,7 +11,6 @@
   <script src="https://unpkg.com/dexie@3/dist/dexie.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docx@7.8.0/build/index.min.js"></script>
   <!-- Google APIs -->
   <script src="https://apis.google.com/js/api.js"></script>
   <script src="https://accounts.google.com/gsi/client"></script>
@@ -25,11 +24,11 @@
     }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       padding: 20px;
-      color: #2c3e50;
+      color: #333;
     }
     
     /* ============== LAYOUT ============== */
@@ -41,7 +40,6 @@
       box-shadow: 0 25px 50px rgba(0,0,0,0.3);
       overflow: hidden;
       min-height: 90vh;
-      position: relative;
     }
     
     /* ============== LOADING SCREEN ============== */
@@ -65,7 +63,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
     }
     
     .loading-spinner {
@@ -76,7 +73,6 @@
       border-top-color: #4ecdc4;
       animation: spin 1s linear infinite;
       margin: 20px 0;
-      box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
     }
     
     @keyframes bounce {
@@ -107,24 +103,6 @@
       max-width: 400px;
       animation: slideUp 0.5s ease;
       border: 3px solid #4ecdc4;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .login-box::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 5px;
-      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
-      animation: gradientMove 3s ease infinite;
-    }
-    
-    @keyframes gradientMove {
-      0%, 100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
     }
     
     @keyframes slideUp {
@@ -141,7 +119,6 @@
       justify-content: center;
       gap: 10px;
       font-size: 24px;
-      font-weight: 700;
     }
     
     /* ============== FORM CONTROLS ============== */
@@ -155,8 +132,6 @@
       color: #1a237e;
       font-weight: 600;
       font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
     
     .form-control {
@@ -168,15 +143,13 @@
       transition: all 0.3s;
       background: #f8f9fa;
       color: #1a237e;
-      font-weight: 500;
     }
     
     .form-control:focus {
       outline: none;
       border-color: #4ecdc4;
       background: white;
-      box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
-      transform: translateY(-2px);
+      box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2);
     }
     
     .form-row {
@@ -211,7 +184,7 @@
       white-space: nowrap;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
       position: relative;
       overflow: hidden;
     }
@@ -223,8 +196,8 @@
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s;
     }
     
     .btn:hover::before {
@@ -233,7 +206,7 @@
     
     .btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4), 0 0 20px rgba(78, 205, 196, 0.3);
     }
     
     .btn:active {
@@ -242,24 +215,40 @@
     
     .btn-logout {
       background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
-      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-logout:hover {
+      box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4), 0 0 20px rgba(255, 107, 107, 0.3);
     }
     
     .btn-add {
       background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+      box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    }
+    
+    .btn-add:hover {
+      box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4), 0 0 20px rgba(46, 204, 113, 0.3);
     }
     
     .btn-transaction {
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-transaction:hover {
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4), 0 0 20px rgba(52, 152, 219, 0.3);
     }
     
     .btn-delete {
       background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+      box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+    
+    .btn-delete:hover {
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.4), 0 0 20px rgba(231, 76, 60, 0.3);
     }
     
     .btn-edit {
@@ -267,44 +256,63 @@
       color: #212529;
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 4px 15px rgba(241, 196, 15, 0.3);
+      box-shadow: 0 4px 12px rgba(241, 196, 15, 0.3);
+    }
+    
+    .btn-edit:hover {
+      box-shadow: 0 8px 20px rgba(241, 196, 15, 0.4), 0 0 20px rgba(241, 196, 15, 0.3);
     }
     
     .btn-export {
       background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-      box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+      box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
     }
     
-    .btn-export-word {
-      background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-      box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+    .btn-export:hover {
+      box-shadow: 0 8px 20px rgba(155, 89, 182, 0.4), 0 0 20px rgba(155, 89, 182, 0.3);
     }
     
     .btn-print {
       background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+      box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+    }
+    
+    .btn-print:hover {
+      box-shadow: 0 8px 20px rgba(230, 126, 34, 0.4), 0 0 20px rgba(230, 126, 34, 0.3);
     }
     
     .btn-save {
       background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
-      box-shadow: 0 4px 15px rgba(26, 188, 156, 0.3);
+      box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
     }
     
     .btn-change-password {
       background: linear-gradient(135deg, #7f8c8d 0%, #34495e 100%);
       padding: 8px 16px;
       font-size: 14px;
-      box-shadow: 0 4px 15px rgba(127, 140, 141, 0.3);
+      box-shadow: 0 4px 12px rgba(127, 140, 141, 0.3);
+    }
+    
+    .btn-change-password:hover {
+      box-shadow: 0 8px 20px rgba(127, 140, 141, 0.4), 0 0 20px rgba(127, 140, 141, 0.3);
     }
     
     .btn-import {
       background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-import:hover {
+      box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4), 0 0 20px rgba(52, 152, 219, 0.3);
     }
     
     .btn-download-template {
       background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-      box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
+      box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+    }
+    
+    .btn-download-template:hover {
+      box-shadow: 0 8px 20px rgba(149, 165, 166, 0.4), 0 0 20px rgba(149, 165, 166, 0.3);
     }
     
     .google-btn {
@@ -319,29 +327,12 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 4px 15px rgba(66, 133, 244, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .google-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .google-btn:hover::before {
-      left: 100%;
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
     }
     
     .google-btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 25px rgba(66, 133, 244, 0.4);
+      box-shadow: 0 8px 20px rgba(66, 133, 244, 0.4), 0 0 20px rgba(66, 133, 244, 0.3);
     }
     
     /* ============== NAVIGATION ============== */
@@ -356,7 +347,6 @@
       top: 0;
       z-index: 100;
       border-bottom: 4px solid #4ecdc4;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     
     .navbar-brand {
@@ -388,7 +378,6 @@
       background: linear-gradient(135deg, #0d1b2a 0%, #1b3a4b 100%);
       padding: 10px 30px;
       border-bottom: 3px solid #4ecdc4;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     
     .nav-buttons {
@@ -415,56 +404,36 @@
       letter-spacing: 0.5px;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     
     .nav-btn::before {
       content: '';
       position: absolute;
       top: 0;
-      left: 0;
+      left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .nav-btn::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, #4ecdc4, #2ecc71);
-      transform: translateY(3px);
-      transition: transform 0.3s;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.6s;
     }
     
     .nav-btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3), 0 0 20px rgba(255,255,255,0.2);
       color: white;
     }
     
-    .nav-btn:hover::after {
-      transform: translateY(0);
-    }
-    
     .nav-btn:hover::before {
-      opacity: 1;
+      left: 100%;
     }
     
     .nav-btn.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: transparent;
-      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.4);
       transform: translateY(-2px);
-    }
-    
-    .nav-btn.active::after {
-      transform: translateY(0);
     }
     
     /* Individual tab colors */
@@ -518,20 +487,20 @@
     
     /* ============== CARDS ============== */
     .card {
-      background: white;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       border-radius: 15px;
       padding: 30px;
       margin: 25px 30px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
       border: 1px solid #e0e0e0;
       position: relative;
       overflow: hidden;
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
     }
     
     .card::before {
@@ -542,7 +511,6 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
-      animation: gradientMove 3s ease infinite;
     }
     
     .card h3 {
@@ -563,8 +531,7 @@
       margin-top: 20px;
       border-radius: 12px;
       border: 1px solid #e0e0e0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      background: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     
     table {
@@ -585,24 +552,23 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       font-size: 14px;
-      white-space: nowrap;
     }
     
     td {
       padding: 16px;
       border-bottom: 1px solid #e0e0e0;
       vertical-align: middle;
-      color: #2c3e50;
-      font-weight: 500;
+      color: #333;
     }
     
     tr {
-      transition: all 0.3s;
+      transition: all 0.3s ease;
     }
     
     tr:hover {
       background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
       transform: scale(1.002);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     
     /* ============== STATUS BADGES ============== */
@@ -618,11 +584,12 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      transition: transform 0.3s;
+      transition: all 0.3s ease;
     }
     
     .status-badge:hover {
       transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
     }
     
     .status-ok {
@@ -649,21 +616,8 @@
       align-items: center;
       justify-content: space-between;
       animation: slideIn 0.3s ease;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
       border: 2px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .alert::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-      opacity: 0.3;
     }
     
     @keyframes slideIn {
@@ -715,7 +669,6 @@
     .close-alert:hover {
       opacity: 1;
       background: rgba(0,0,0,0.1);
-      transform: rotate(90deg);
     }
     
     /* ============== STATS GRID ============== */
@@ -727,15 +680,20 @@
     }
     
     .stat-card {
-      background: white;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       padding: 30px;
       border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
       text-align: center;
       border: 1px solid #e0e0e0;
       transition: transform 0.3s, box-shadow 0.3s;
       position: relative;
       overflow: hidden;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15), 0 0 20px rgba(78, 205, 196, 0.2);
     }
     
     .stat-card::before {
@@ -746,12 +704,6 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
-      animation: gradientMove 3s ease infinite;
-    }
-    
-    .stat-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
     }
     
     .stat-icon {
@@ -761,7 +713,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
     }
     
     .stat-value {
@@ -772,7 +723,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .stat-label {
@@ -790,28 +740,7 @@
       border-radius: 15px;
       margin-bottom: 25px;
       border: 2px solid #e0e0e0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    }
-    
-    .filter-group {
-      margin-bottom: 20px;
-    }
-    
-    .filter-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #1a237e;
-      font-weight: 600;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .filter-row {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
     .quick-filters {
@@ -821,58 +750,31 @@
       flex-wrap: wrap;
     }
     
-    .filter-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    .quick-filter-btn {
       background: white;
       border: 2px solid #dee2e6;
-      padding: 8px 16px;
-      border-radius: 25px;
+      padding: 10px 20px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.3s;
       font-size: 14px;
       font-weight: 500;
       color: #666;
-      user-select: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
-    .filter-chip:hover {
+    .quick-filter-btn:hover {
       border-color: #4ecdc4;
       color: #4ecdc4;
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(78, 205, 196, 0.2);
     }
     
-    .filter-chip.active {
+    .quick-filter-btn.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: #4ecdc4;
-      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-    }
-    
-    .filter-chip.active:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
-    }
-    
-    /* ============== REPORT FILTERS ============== */
-    .report-filters {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin-bottom: 25px;
-    }
-    
-    .date-range-picker {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-    
-    .date-range-picker .form-group {
-      flex: 1;
-      margin-bottom: 0;
+      box-shadow: 0 4px 8px rgba(78, 205, 196, 0.3);
     }
     
     /* ============== MODALS ============== */
@@ -897,7 +799,7 @@
     }
     
     .modal {
-      background: white;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       padding: 35px;
       border-radius: 20px;
       min-width: 500px;
@@ -918,7 +820,6 @@
       width: 100%;
       height: 5px;
       background: linear-gradient(90deg, #4ecdc4, #2ecc71);
-      animation: gradientMove 3s ease infinite;
     }
     
     @keyframes scaleIn {
@@ -1036,37 +937,21 @@
       color: #666;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .report-type-btn::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-      transition: left 0.5s;
-    }
-    
-    .report-type-btn:hover::before {
-      left: 100%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
     
     .report-type-btn:hover {
       border-color: #4ecdc4;
       color: #4ecdc4;
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.2);
     }
     
     .report-type-btn.active {
       background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
       color: white;
       border-color: #4ecdc4;
-      box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
     }
     
     /* ============== IMPORT SECTION ============== */
@@ -1092,6 +977,7 @@
       border-color: #4ecdc4;
       background: #f8f9fa;
       transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(78, 205, 196, 0.2);
     }
     
     .import-dropzone.dragover {
@@ -1121,7 +1007,7 @@
       border-radius: 15px;
       margin-bottom: 25px;
       border: 2px solid #e0e0e0;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
     .google-status {
@@ -1156,6 +1042,97 @@
       margin-top: 25px;
       max-height: 300px;
       overflow-y: auto;
+    }
+    
+    /* ============== MULTI-SELECT FILTERS ============== */
+    .multi-select-container {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    
+    .multi-select-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      color: #666;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .multi-select-option:hover {
+      border-color: #4ecdc4;
+      color: #4ecdc4;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(78, 205, 196, 0.2);
+    }
+    
+    .multi-select-option.selected {
+      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+      color: white;
+      border-color: #4ecdc4;
+      box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+    }
+    
+    .multi-select-option.selected .checkmark {
+      display: block;
+    }
+    
+    .checkmark {
+      display: none;
+      font-size: 14px;
+    }
+    
+    /* ============== DATE RANGE FILTER ============== */
+    .date-range-filter {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+    
+    .date-input-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    
+    .date-input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #1a237e;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    /* ============== GOOGLE DRIVE STATUS ============== */
+    .drive-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    
+    .drive-status.connected {
+      background: linear-gradient(135deg, #34a853 0%, #0d652d 100%);
+      color: white;
+      box-shadow: 0 4px 8px rgba(52, 168, 83, 0.3);
+    }
+    
+    .drive-status.disconnected {
+      background: linear-gradient(135deg, #ea4335 0%, #b71c1c 100%);
+      color: white;
+      box-shadow: 0 4px 8px rgba(234, 67, 53, 0.3);
     }
     
     /* ============== PRINT STYLES ============== */
@@ -1223,7 +1200,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
     .storage-bar {
@@ -1250,11 +1227,6 @@
       align-items: center;
       gap: 8px;
       font-weight: 600;
-    }
-    
-    /* ============== DASHBOARD RECENT TRANSACTIONS ============== */
-    .dashboard-recent-table th {
-      white-space: nowrap;
     }
     
     /* ============== RESPONSIVE ============== */
@@ -1311,14 +1283,6 @@
         margin: 10px;
         padding: 25px;
       }
-      
-      .report-filters {
-        grid-template-columns: 1fr;
-      }
-      
-      .date-range-picker {
-        flex-direction: column;
-      }
     }
     
     /* ============== UTILITY CLASSES ============== */
@@ -1368,76 +1332,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
-    /* ============== MULTI-SELECT FILTERS ============== */
-    .multi-select {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    
-    .filter-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #e9ecef;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #495057;
-    }
-    
-    .filter-tag .remove {
-      cursor: pointer;
-      font-size: 16px;
-      line-height: 1;
-      padding: 2px;
-      border-radius: 50%;
-    }
-    
-    .filter-tag .remove:hover {
-      background: rgba(0,0,0,0.1);
-    }
-    
-    /* ============== GOOGLE DRIVE STATUS ============== */
-    .drive-status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .drive-connected {
-      background: linear-gradient(135deg, #34a853 0%, #0d652d 100%);
-      color: white;
-    }
-    
-    .drive-disconnected {
-      background: linear-gradient(135deg, #ea4335 0%, #b71c1c 100%);
-      color: white;
-    }
-    
-    .drive-status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    
-    .drive-connected .drive-status-dot {
-      background: #34a853;
-      box-shadow: 0 0 10px #34a853;
-    }
-    
-    .drive-disconnected .drive-status-dot {
-      background: #ea4335;
-      box-shadow: 0 0 10px #ea4335;
-    }
   </style>
 </head>
 <body>
@@ -1445,7 +1339,7 @@
 
   <script type="text/babel">
     // ================= DATABASE SETUP =================
-    const db = new Dexie("StoresDB_V3");
+    const db = new Dexie("StoresDB_V2");
     
     db.version(1).stores({
       users: '++id,username,password,role,name',
@@ -1562,7 +1456,7 @@
           
           const backupData = {
             app: 'DUR Ahafo Stores Management System',
-            version: '2.0',
+            version: '1.0',
             timestamp: new Date().toISOString(),
             data: data
           };
@@ -1801,171 +1695,84 @@
         const templateData = [
           {
             'Product Name': 'Laptop',
-            'Quantity': '10',
-            'Unit Cost (GH¢)': '800.00',
-            'Reference': 'PO-2024-001',
-            'Date': new Date().toISOString().split('T')[0]
+            'Unit': 'Piece',
+            'Current Stock': '10',
+            'Reorder Level': '5',
+            'Average Unit Cost (GH¢)': '800.00',
+            'Total Cost of Purchases (GH¢)': '8000.00',
+            'Current Inventory Value (GH¢)': '8000.00'
           },
           {
             'Product Name': 'Mouse',
-            'Quantity': '50',
-            'Unit Cost (GH¢)': '15.00',
-            'Reference': 'PO-2024-002',
-            'Date': new Date().toISOString().split('T')[0]
+            'Unit': 'Piece',
+            'Current Stock': '50',
+            'Reorder Level': '20',
+            'Average Unit Cost (GH¢)': '15.00',
+            'Total Cost of Purchases (GH¢)': '750.00',
+            'Current Inventory Value (GH¢)': '750.00'
           }
         ];
         
         const worksheet = XLSX.utils.json_to_sheet(templateData);
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Import Template');
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Stock Import Template');
         XLSX.writeFile(workbook, 'Stock_Import_Template.xlsx');
       },
       
-      exportToWord: (data, title, columns, filename = 'Report.docx') => {
-        try {
-          const { Document, Paragraph, Table, TableRow, TableCell, TextRun, HeadingLevel } = window.docx;
-          
-          // Create header
-          const headerParagraph = new Paragraph({
-            children: [
-              new TextRun({
-                text: 'DUR AHAFO STORES MANAGEMENT SYSTEM',
-                bold: true,
-                size: 32,
-                color: '1a237e'
-              })
-            ],
-            heading: HeadingLevel.TITLE,
-            alignment: 'center',
-            spacing: { after: 400 }
-          });
-          
-          const titleParagraph = new Paragraph({
-            children: [
-              new TextRun({
-                text: title,
-                bold: true,
-                size: 28,
-                color: '283593'
-              })
-            ],
-            heading: HeadingLevel.HEADING_1,
-            alignment: 'center',
-            spacing: { after: 300 }
-          });
-          
-          const dateParagraph = new Paragraph({
-            children: [
-              new TextRun({
-                text: `Generated on: ${new Date().toLocaleDateString('en-GH', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}`,
-                italic: true,
-                size: 22,
-                color: '666666'
-              })
-            ],
-            alignment: 'center',
-            spacing: { after: 400 }
-          });
-          
-          // Create table rows
-          const tableRows = [
-            new TableRow({
-              children: columns.map(col => 
-                new TableCell({
-                  children: [new Paragraph({
-                    children: [new TextRun({
-                      text: col,
-                      bold: true,
-                      color: 'ffffff',
-                      size: 20
-                    })],
-                    alignment: 'center'
-                  })],
-                  shading: {
-                    fill: '1a237e'
-                  }
-                })
-              ),
-              tableHeader: true
-            }),
-            ...data.map(row => 
-              new TableRow({
-                children: columns.map(col => 
-                  new TableCell({
-                    children: [new Paragraph({
-                      children: [new TextRun({
-                        text: String(row[col] || ''),
-                        size: 18
-                      })],
-                      alignment: 'left'
-                    })]
-                  })
-                )
-              })
-            )
-          ];
-          
-          // Create summary paragraph if it's a stock report
-          let summaryParagraph;
-          if (title.includes('Stock')) {
-            const totalItems = data.length;
-            const totalValue = data.reduce((sum, item) => {
-              const value = parseFloat(item['Current Inventory Value (GH¢)']?.replace(/[^\d.-]/g, '') || 0);
-              return sum + value;
-            }, 0);
-            
-            summaryParagraph = new Paragraph({
-              children: [
-                new TextRun({
-                  text: `Total Items: ${totalItems} | Total Inventory Value: ${helpers.formatCurrency(totalValue)}`,
-                  bold: true,
-                  size: 22,
-                  color: '27ae60'
-                })
-              ],
-              spacing: { before: 300, after: 300 }
-            });
-          }
-          
-          // Create document
-          const doc = new Document({
-            sections: [{
-              properties: {},
-              children: [
-                headerParagraph,
-                titleParagraph,
-                dateParagraph,
-                summaryParagraph,
-                new Paragraph({
-                  children: [new TextRun({ text: '' })],
-                  spacing: { after: 200 }
-                }),
-                new Table({
-                  rows: tableRows,
-                  width: {
-                    size: 100,
-                    type: 'pct'
-                  }
-                })
-              ]
-            }]
-          });
-          
-          // Save document
-          window.docx.Packer.toBlob(doc).then(blob => {
-            saveAs(blob, filename);
-          });
-          
-        } catch (error) {
-          console.error('Error generating Word document:', error);
-          alert('Error exporting to Word. Please try again.');
-        }
+      exportToWord: (data, columns, title) => {
+        // Create HTML content for Word
+        let html = `
+          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+          <head>
+            <meta charset="UTF-8">
+            <title>${title}</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              h1 { color: #1a237e; text-align: center; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th { background: #1a237e; color: white; padding: 10px; text-align: left; }
+              td { padding: 8px; border: 1px solid #ddd; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #666; }
+              .date { text-align: right; margin-bottom: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>${title}</h1>
+              <h3>DUR Ahafo Stores Management System</h3>
+            </div>
+            <div class="date">
+              Generated on: ${new Date().toLocaleDateString('en-GH')} ${new Date().toLocaleTimeString('en-GH')}
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  ${columns.map(col => `<th>${col}</th>`).join('')}
+                </tr>
+              </thead>
+              <tbody>
+                ${data.map(row => `
+                  <tr>
+                    ${columns.map(col => `<td>${row[col] || ''}</td>`).join('')}
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} DUR Ahafo Stores Management System. All rights reserved.</p>
+            </div>
+          </body>
+          </html>
+        `;
+        
+        // Convert to blob and download
+        const blob = new Blob(['\ufeff', html], {
+          type: 'application/msword'
+        });
+        
+        const filename = `${title.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.doc`;
+        saveAs(blob, filename);
       }
     };
     
@@ -1983,13 +1790,13 @@
           await db.users.bulkAdd([
             { 
               username: "storekeeper", 
-              password: "123456", 
+              password: "Store123", 
               role: "STOREKEEPER", 
               name: "Store Manager" 
             },
             { 
               username: "supervisor", 
-              password: "123456", 
+              password: "Super123", 
               role: "SUPERVISOR", 
               name: "Supervisor" 
             },
@@ -2257,12 +2064,7 @@
       return (
         <div className="google-drive-section">
           <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>
-            <span style={{ 
-              background: 'linear-gradient(135deg, #4285f4, #34a853)', 
-              WebkitBackgroundClip: 'text', 
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
-            }}>☁️</span> Google Drive Backup & Sync
+            <span className="gradient-text">☁️</span> Google Drive Backup & Sync
           </h4>
           
           <div className={`google-status ${driveStatus.signedIn ? 'connected' : 'disconnected'}`}>
@@ -2391,122 +2193,6 @@
       );
     }
     
-    // ================= REPORT FILTERS COMPONENT =================
-    function ReportFilters({ filters, setFilters, reportType }) {
-      const statusOptions = [
-        { value: 'OUT', label: 'Out of Stock', color: '#e74c3c' },
-        { value: 'LOW', label: 'Low Stock', color: '#f1c40f' },
-        { value: 'OK', label: 'In Stock', color: '#2ecc71' }
-      ];
-      
-      const toggleStatus = (status) => {
-        const currentStatuses = filters.status || [];
-        if (currentStatuses.includes(status)) {
-          setFilters({
-            ...filters,
-            status: currentStatuses.filter(s => s !== status)
-          });
-        } else {
-          setFilters({
-            ...filters,
-            status: [...currentStatuses, status]
-          });
-        }
-      };
-      
-      const clearFilters = () => {
-        setFilters({
-          status: [],
-          startDate: '',
-          endDate: ''
-        });
-      };
-      
-      return (
-        <div className="filter-section">
-          <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Filter Options</h4>
-          
-          <div className="report-filters">
-            <div className="filter-group">
-              <label>Stock Status</label>
-              <div className="multi-select">
-                {statusOptions.map(option => (
-                  <div
-                    key={option.value}
-                    className={`filter-chip ${(filters.status || []).includes(option.value) ? 'active' : ''}`}
-                    onClick={() => toggleStatus(option.value)}
-                    style={{
-                      borderColor: (filters.status || []).includes(option.value) ? option.color : '#dee2e6'
-                    }}
-                  >
-                    <span>{(filters.status || []).includes(option.value) ? '✓' : '○'}</span>
-                    <span>{option.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div className="filter-group">
-              <label>Date Range</label>
-              <div className="date-range-picker">
-                <div className="form-group">
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={filters.startDate}
-                    onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-                  />
-                </div>
-                <span>to</span>
-                <div className="form-group">
-                  <input
-                    type="date"
-                    className="form-control"
-                    value={filters.endDate}
-                    onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {(filters.status?.length > 0 || filters.startDate || filters.endDate) && (
-            <div style={{ marginTop: '20px' }}>
-              <div className="multi-select">
-                {filters.status?.map(status => {
-                  const option = statusOptions.find(o => o.value === status);
-                  return (
-                    <span key={status} className="filter-tag">
-                      <span>{option?.label}</span>
-                      <span className="remove" onClick={() => toggleStatus(status)}>×</span>
-                    </span>
-                  );
-                })}
-                {filters.startDate && (
-                  <span className="filter-tag">
-                    <span>From: {new Date(filters.startDate).toLocaleDateString()}</span>
-                    <span className="remove" onClick={() => setFilters({ ...filters, startDate: '' })}>×</span>
-                  </span>
-                )}
-                {filters.endDate && (
-                  <span className="filter-tag">
-                    <span>To: {new Date(filters.endDate).toLocaleDateString()}</span>
-                    <span className="remove" onClick={() => setFilters({ ...filters, endDate: '' })}>×</span>
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <div style={{ marginTop: '20px' }}>
-            <button onClick={clearFilters} className="btn" style={{ padding: '8px 16px', fontSize: '14px' }}>
-              <span>🗑️</span> Clear Filters
-            </button>
-          </div>
-        </div>
-      );
-    }
-    
     // ================= MAIN APP COMPONENT =================
     function App() {
       const [isLoading, setIsLoading] = React.useState(true);
@@ -2532,7 +2218,8 @@
       const [showBackupModal, setShowBackupModal] = React.useState(false);
       const [lastSync, setLastSync] = React.useState(null);
       const [driveStatus, setDriveStatus] = React.useState({
-        connected: false,
+        initialized: false,
+        signedIn: false,
         loading: false
       });
       
@@ -2554,6 +2241,14 @@
             
             const calculatedStats = helpers.calculateStats(productList, movementList);
             setStats(calculatedStats);
+            
+            // Initialize Google Drive
+            const driveInitialized = await GoogleDriveManager.init();
+            setDriveStatus({
+              initialized: driveInitialized,
+              signedIn: GoogleDriveManager.isSignedIn,
+              loading: false
+            });
             
             setIsLoading(false);
             console.log("App initialized successfully");
@@ -2585,6 +2280,31 @@
         }
       }, [products, movements]);
       
+      // Auto-sync every 5 minutes if signed in
+      React.useEffect(() => {
+        if (GoogleDriveManager.isSignedIn) {
+          const syncInterval = setInterval(async () => {
+            try {
+              const driveBackups = await GoogleDriveManager.listBackups();
+              if (driveBackups.length > 0) {
+                const latestBackup = driveBackups[0];
+                const backupData = await GoogleDriveManager.restoreBackup(latestBackup.id);
+                
+                if (backupData && backupData.data) {
+                  await GoogleDriveManager.syncData(backupData.data);
+                  setLastSync(new Date());
+                  console.log("Auto-sync completed at", new Date().toLocaleTimeString());
+                }
+              }
+            } catch (error) {
+              console.error("Auto-sync error:", error);
+            }
+          }, 5 * 60 * 1000); // 5 minutes
+          
+          return () => clearInterval(syncInterval);
+        }
+      }, [GoogleDriveManager.isSignedIn]);
+      
       const showAlert = (message, type) => {
         setAlert({ show: true, message, type });
         setTimeout(() => setAlert({ show: false, message: '', type: '' }), 5000);
@@ -2610,59 +2330,46 @@
       const handleLogin = async (e) => {
         e.preventDefault();
         try {
-          setDriveStatus({ connected: false, loading: true });
+          console.log("Login attempt for:", loginData.username);
           
           // Get all users
           const allUsers = await db.users.toArray();
+          console.log("Available users:", allUsers.map(u => u.username));
           
-          // Find user
+          // Find user (case-insensitive)
           const foundUser = allUsers.find(u => 
             u.username.toLowerCase() === loginData.username.toLowerCase()
           );
           
           if (!foundUser) {
-            showAlert('User not found', 'error');
-            setDriveStatus({ connected: false, loading: false });
+            showAlert('Invalid username or password', 'error');
             return;
           }
           
           if (foundUser.password !== loginData.password) {
-            showAlert('Incorrect password', 'error');
-            setDriveStatus({ connected: false, loading: false });
+            showAlert('Invalid username or password', 'error');
             return;
           }
           
-          // Initialize Google Drive
-          try {
-            const driveInitialized = await GoogleDriveManager.init();
-            if (driveInitialized) {
-              setDriveStatus({ connected: GoogleDriveManager.isSignedIn, loading: false });
-              if (GoogleDriveManager.isSignedIn) {
-                showAlert('✓ Connected to Google Drive', 'success');
-              }
-            } else {
-              setDriveStatus({ connected: false, loading: false });
-            }
-          } catch (driveError) {
-            console.error('Google Drive initialization error:', driveError);
-            setDriveStatus({ connected: false, loading: false });
+          setUser(foundUser);
+          
+          // Check Google Drive connection
+          if (driveStatus.initialized && GoogleDriveManager.isSignedIn) {
+            showAlert(`Welcome back, ${foundUser.name}! Connected to Google Drive`, 'success');
+          } else {
+            showAlert(`Welcome back, ${foundUser.name}!`, 'success');
           }
           
-          setUser(foundUser);
-          showAlert(`Welcome back, ${foundUser.name}!`, 'success');
           setActiveView('dashboard');
-          
         } catch (error) {
           console.error("Login error:", error);
           showAlert('Login failed. Please try again.', 'error');
-          setDriveStatus({ connected: false, loading: false });
         }
       };
       
       const logout = () => {
         setUser(null);
         setLoginData({ username: '', password: '' });
-        setDriveStatus({ connected: false, loading: false });
         showAlert('Logged out successfully', 'success');
       };
       
@@ -2773,41 +2480,55 @@
         }
       };
       
-      const importMovements = async (importBatch) => {
+      const importStockData = async (importBatch) => {
         try {
           if (!importBatch || importBatch.length === 0) {
             showAlert('No valid data to import', 'error');
             return;
           }
           
-          const batchId = `IMPORT_${Date.now()}`;
           let successCount = 0;
           let errorCount = 0;
           
           for (const item of importBatch) {
             try {
-              const product = products.find(p => 
+              // Check if product exists
+              let product = products.find(p => 
                 p.name.toLowerCase() === item.productName.toLowerCase()
               );
               
               if (!product) {
-                errorCount++;
-                continue;
+                // Create new product
+                product = {
+                  name: item.productName,
+                  unit: item.unit,
+                  reorderLevel: parseInt(item.reorderLevel) || 0,
+                  currentUnitCost: parseFloat(item.averageUnitCost) || 0,
+                  createdAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString()
+                };
+                
+                const productId = await db.products.add(product);
+                product.id = productId;
               }
               
-              const movement = {
-                productId: product.id,
-                type: 'IN',
-                quantity: parseInt(item.quantity),
-                unitCost: parseFloat(item.unitCost),
-                reference: item.reference || `IMPORT-${batchId}`,
-                date: item.date ? new Date(item.date).toISOString() : new Date().toISOString(),
-                userId: user.id,
-                totalValue: parseInt(item.quantity) * parseFloat(item.unitCost),
-                importBatch: batchId
-              };
+              // Add initial stock movement
+              if (parseInt(item.currentStock) > 0) {
+                const movement = {
+                  productId: product.id,
+                  type: 'IN',
+                  quantity: parseInt(item.currentStock),
+                  unitCost: parseFloat(item.averageUnitCost) || 0,
+                  reference: 'STOCK_IMPORT',
+                  date: new Date().toISOString(),
+                  userId: user.id,
+                  totalValue: parseInt(item.currentStock) * (parseFloat(item.averageUnitCost) || 0),
+                  importBatch: `STOCK_IMPORT_${Date.now()}`
+                };
+                
+                await db.movements.add(movement);
+              }
               
-              await db.movements.add(movement);
               successCount++;
               
             } catch (error) {
@@ -2819,13 +2540,13 @@
           await loadData();
           
           if (successCount > 0) {
-            showAlert(`Successfully imported ${successCount} records${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+            showAlert(`Successfully imported ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
             // Trigger data change for sync
             window.dispatchEvent(new CustomEvent('dataChanged'));
           }
           
           if (errorCount > 0 && successCount === 0) {
-            showAlert('No records were imported. Please check your data format.', 'error');
+            showAlert('No products were imported. Please check your data format.', 'error');
           }
           
           setShowImportModal(false);
@@ -2833,7 +2554,7 @@
           setImportErrors([]);
           
         } catch (error) {
-          console.error("Error importing movements:", error);
+          console.error("Error importing stock data:", error);
           showAlert('Error importing data', 'error');
         }
       };
@@ -2885,15 +2606,52 @@
         }
       };
       
-      const exportToExcel = (reportType, filteredData) => {
+      const exportToExcel = (reportType, filteredData = null, columns = []) => {
         try {
-          let reportData = filteredData || [];
+          let reportData = [];
           let fileName = '';
           
           if (reportType === 'stock') {
+            const dataToExport = filteredData || products;
+            reportData = dataToExport.map(product => {
+              const stock = helpers.getProductBalance(product.id, movements);
+              const status = helpers.getProductStatus(product.id, products, movements);
+              const costData = helpers.calculateProductCost(product.id, movements);
+              
+              return {
+                'Product ID': product.id,
+                'Product Name': product.name,
+                'Unit': product.unit,
+                'Current Stock': stock,
+                'Reorder Level': product.reorderLevel,
+                'Total Cost of Purchases (GH¢)': costData.totalCost,
+                'Average Unit Cost (GH¢)': costData.averageUnitCost.toFixed(2),
+                'Current Inventory Value (GH¢)': costData.currentValue.toFixed(2),
+                'Status': status
+              };
+            });
+            
             fileName = `Stock_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
           } 
           else if (reportType === 'transactions') {
+            const dataToExport = filteredData || movements;
+            reportData = dataToExport.map(movement => {
+              const product = products.find(p => p.id === movement.productId);
+              const userObj = users.find(u => u.id === movement.userId);
+              
+              return {
+                'Date': helpers.formatDateShort(movement.date),
+                'Product': product ? product.name : `Product ${movement.productId}`,
+                'Type': movement.type === 'IN' ? 'Receipt' : 'Issue',
+                'Quantity': movement.quantity,
+                'Unit Cost (GH¢)': movement.unitCost || 0,
+                'Total Value (GH¢)': movement.totalValue || 0,
+                'Reference': movement.reference || '-',
+                'User': userObj ? userObj.name : `User ${movement.userId}`,
+                'Import Batch': movement.importBatch || '-'
+              };
+            });
+            
             fileName = `Transaction_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
           }
           
@@ -2909,48 +2667,54 @@
         }
       };
       
-      const exportToWord = (reportType, filteredData) => {
+      const exportToWord = (reportType, filteredData = null, title = 'Report') => {
         try {
-          let reportData = filteredData || [];
-          let title = '';
+          let reportData = [];
           let columns = [];
           
           if (reportType === 'stock') {
-            title = 'Stock Status Report';
-            columns = ['Product', 'Unit', 'Current Stock', 'Reorder Level', 'Total Cost of Purchases (GH¢)', 'Average Unit Cost (GH¢)', 'Current Inventory Value (GH¢)', 'Status'];
+            const dataToExport = filteredData || products;
+            columns = ['Product Name', 'Unit', 'Current Stock', 'Reorder Level', 'Total Cost of Purchases (GH¢)', 'Average Unit Cost (GH¢)', 'Current Inventory Value (GH¢)', 'Status'];
             
-            const wordData = reportData.map(item => ({
-              'Product': item.name,
-              'Unit': item.unit,
-              'Current Stock': item.currentStock,
-              'Reorder Level': item.reorderLevel,
-              'Total Cost of Purchases (GH¢)': helpers.formatCurrency(item.totalCost),
-              'Average Unit Cost (GH¢)': helpers.formatCurrency(item.averageUnitCost),
-              'Current Inventory Value (GH¢)': helpers.formatCurrency(item.currentValue),
-              'Status': item.status === 'OUT' ? 'Out of Stock' : item.status === 'LOW' ? 'Low Stock' : 'In Stock'
-            }));
-            
-            helpers.exportToWord(wordData, title, columns, `Stock_Report_${new Date().toISOString().split('T')[0]}.docx`);
+            reportData = dataToExport.map(product => {
+              const stock = helpers.getProductBalance(product.id, movements);
+              const status = helpers.getProductStatus(product.id, products, movements);
+              const costData = helpers.calculateProductCost(product.id, movements);
+              
+              return {
+                'Product Name': product.name,
+                'Unit': product.unit,
+                'Current Stock': stock,
+                'Reorder Level': product.reorderLevel,
+                'Total Cost of Purchases (GH¢)': helpers.formatCurrency(costData.totalCost),
+                'Average Unit Cost (GH¢)': helpers.formatCurrency(costData.averageUnitCost),
+                'Current Inventory Value (GH¢)': helpers.formatCurrency(costData.currentValue),
+                'Status': status
+              };
+            });
           } 
           else if (reportType === 'transactions') {
-            title = 'Transaction Report';
-            columns = ['Date', 'Product', 'Type', 'Quantity', 'Unit Cost (GH¢)', 'Total Value (GH¢)', 'Reference', 'User', 'Import Batch'];
+            const dataToExport = filteredData || movements;
+            columns = ['Date', 'Product', 'Type', 'Quantity', 'Unit Cost (GH¢)', 'Total Value (GH¢)', 'Reference', 'User'];
             
-            const wordData = reportData.map(item => ({
-              'Date': helpers.formatDateShort(item.date),
-              'Product': item.productName,
-              'Type': item.type === 'IN' ? 'Receipt' : 'Issue',
-              'Quantity': item.quantity,
-              'Unit Cost (GH¢)': helpers.formatCurrency(item.unitCost || 0),
-              'Total Value (GH¢)': helpers.formatCurrency(item.totalValue || 0),
-              'Reference': item.reference || '-',
-              'User': item.userName || `User ${item.userId}`,
-              'Import Batch': item.importBatch || '-'
-            }));
-            
-            helpers.exportToWord(wordData, title, columns, `Transaction_Report_${new Date().toISOString().split('T')[0]}.docx`);
+            reportData = dataToExport.map(movement => {
+              const product = products.find(p => p.id === movement.productId);
+              const userObj = users.find(u => u.id === movement.userId);
+              
+              return {
+                'Date': helpers.formatDateShort(movement.date),
+                'Product': product ? product.name : `Product ${movement.productId}`,
+                'Type': movement.type === 'IN' ? 'Receipt' : 'Issue',
+                'Quantity': movement.quantity,
+                'Unit Cost (GH¢)': helpers.formatCurrency(movement.unitCost || 0),
+                'Total Value (GH¢)': helpers.formatCurrency(movement.totalValue || 0),
+                'Reference': movement.reference || '-',
+                'User': userObj ? userObj.name : `User ${movement.userId}`
+              };
+            });
           }
           
+          helpers.exportToWord(reportData, columns, title);
           showAlert('Report exported to Word successfully', 'success');
         } catch (error) {
           console.error("Word export error:", error);
@@ -2966,7 +2730,7 @@
         return (
           <div className="login-container">
             <div className="login-box">
-              <h2><span style={{ background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span> DUR Ahafo Stores Management System</h2>
+              <h2><span className="gradient-text">📦</span> DUR Ahafo Stores Management System</h2>
               
               {alert.show && (
                 <div className={`alert alert-${alert.type}`}>
@@ -2987,7 +2751,6 @@
                     value={loginData.username}
                     onChange={(e) => setLoginData({...loginData, username: e.target.value})}
                     required
-                    autoComplete="username"
                   />
                 </div>
                 
@@ -3000,7 +2763,6 @@
                     value={loginData.password}
                     onChange={(e) => setLoginData({...loginData, password: e.target.value})}
                     required
-                    autoComplete="current-password"
                   />
                 </div>
                 
@@ -3012,18 +2774,17 @@
               <div style={{ marginTop: '25px', padding: '20px', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: '12px', border: '2px solid #e0e0e0' }}>
                 <h4 style={{ fontSize: '16px', color: '#1a237e', marginBottom: '15px', fontWeight: '600' }}>Demo Credentials:</h4>
                 <div style={{ fontSize: '14px', color: '#666' }}>
-                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / 123456</p>
-                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / 123456</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / Store123</p>
+                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / Super123</p>
                   <p style={{ marginBottom: '8px' }}><strong>Admin:</strong> admin / Admin123</p>
                 </div>
               </div>
               
-              {driveStatus.loading && (
-                <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                  <div className="loading-spinner" style={{ width: '30px', height: '30px', margin: '0 auto' }}></div>
-                  <p style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>Connecting to Google Drive...</p>
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <div className={`drive-status ${GoogleDriveManager.isSignedIn ? 'connected' : 'disconnected'}`}>
+                  {GoogleDriveManager.isSignedIn ? '✅ Connected to Google Drive' : '⚠️ Google Drive Not Connected'}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         );
@@ -3035,26 +2796,18 @@
             {/* Navigation Bar */}
             <div className="navbar">
               <div className="navbar-brand">
-                <span style={{ fontSize: '32px', background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span>
-                <span style={{ background: 'linear-gradient(135deg, #ff6b6b, #4ecdc4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>DUR Ahafo Stores Management System</span>
+                <span className="gradient-text" style={{ fontSize: '32px' }}>📦</span>
+                <span className="gradient-text">DUR Ahafo Stores Management System</span>
               </div>
               
               <div className="user-info">
                 <span>Welcome, <strong style={{ color: '#4ecdc4' }}>{user.name}</strong></span>
                 <span className="user-badge">{user.role}</span>
-                
-                {driveStatus.connected ? (
-                  <span className="drive-status-indicator drive-connected">
-                    <div className="drive-status-dot"></div>
-                    <span>Drive Connected</span>
-                  </span>
-                ) : (
-                  <span className="drive-status-indicator drive-disconnected">
-                    <div className="drive-status-dot"></div>
-                    <span>Drive Offline</span>
-                  </span>
+                {driveStatus.signedIn && (
+                  <div className="drive-status connected" style={{ fontSize: '12px' }}>
+                    <span>☁️</span> Drive Connected
+                  </div>
                 )}
-                
                 <button 
                   className="btn btn-change-password" 
                   onClick={() => setShowChangePasswordModal(true)}
@@ -3125,7 +2878,7 @@
                 <button 
                   className={`nav-btn history ${activeView === 'history' ? 'active' : ''}`}
                   onClick={() => setActiveView('history')}
-                  >
+                >
                   <span>📋</span> History
                 </button>
                 
@@ -3171,6 +2924,7 @@
                   }}
                   user={user}
                   helpers={helpers}
+                  showImportModal={() => setShowImportModal(true)}
                 />
               )}
               
@@ -3180,7 +2934,6 @@
                   movements={movements}
                   addMovement={addMovement}
                   helpers={helpers}
-                  showImportModal={() => setShowImportModal(true)}
                   user={user}
                 />
               )}
@@ -3195,7 +2948,7 @@
               )}
               
               {activeView === 'reports' && (
-                <EnhancedReports 
+                <Reports 
                   products={products}
                   movements={movements}
                   users={users}
@@ -3251,8 +3004,8 @@
           
           {/* Import Modal */}
           {showImportModal && (
-            <ImportModal
-              onImport={importMovements}
+            <StockImportModal
+              onImport={importStockData}
               onCancel={() => {
                 setShowImportModal(false);
                 setImportData([]);
@@ -3284,7 +3037,7 @@
     
     // ================= DASHBOARD COMPONENT =================
     function Dashboard({ products, movements, stats, helpers }) {
-      const recentMovements = movements.slice(-10).reverse();
+      const recentProducts = products.slice(-10).reverse();
       
       if (!stats) return <div className="card">Loading dashboard...</div>;
       
@@ -3337,10 +3090,10 @@
             </div>
           </div>
           
-          {/* Stock Status Table */}
+          {/* Recent Products Overview */}
           <div className="card">
-            <h3><span style={{ background: 'linear-gradient(135deg, #4ecdc4, #2ecc71)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📊</span> Current Stock Status</h3>
-            <div className="table-container dashboard-recent-table">
+            <h3><span className="gradient-text">📊</span> Recent Products Overview</h3>
+            <div className="table-container">
               <table>
                 <thead>
                   <tr>
@@ -3351,11 +3104,13 @@
                     <th>Total Cost of Purchases (GH¢)</th>
                     <th>Average Unit Cost (GH¢)</th>
                     <th>Current Inventory Value (GH¢)</th>
+                    <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {products.slice(0, 10).map(product => {
+                  {recentProducts.map(product => {
                     const stock = helpers.getProductBalance(product.id, movements);
+                    const status = helpers.getProductStatus(product.id, products, movements);
                     const costData = helpers.calculateProductCost(product.id, movements);
                     
                     return (
@@ -3364,7 +3119,8 @@
                         <td>{product.unit}</td>
                         <td style={{ 
                           fontWeight: 'bold',
-                          color: stock === 0 ? '#e74c3c' : stock <= product.reorderLevel ? '#f39c12' : '#27ae60'
+                          color: status === 'OUT' ? '#e74c3c' : 
+                                 status === 'LOW' ? '#f39c12' : '#27ae60'
                         }}>
                           {stock}
                         </td>
@@ -3374,6 +3130,12 @@
                         <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
                           {helpers.formatCurrency(costData.currentValue)}
                         </td>
+                        <td>
+                          <span className={`status-badge status-${status.toLowerCase()}`}>
+                            {status === 'OUT' ? '🛑 Out of Stock' : 
+                             status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
+                          </span>
+                        </td>
                       </tr>
                     );
                   })}
@@ -3382,59 +3144,63 @@
             </div>
           </div>
           
-          {/* Recent Transactions */}
-          <div className="card">
-            <h3><span style={{ background: 'linear-gradient(135deg, #4ecdc4, #2ecc71)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🔄</span> Recent Transactions</h3>
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date & Time</th>
-                    <th>Product</th>
-                    <th>Type</th>
-                    <th>Quantity</th>
-                    <th>Unit Cost (GH¢)</th>
-                    <th>Total Value (GH¢)</th>
-                    <th>Reference</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recentMovements.map(movement => {
-                    const product = products.find(p => p.id === movement.productId);
-                    return (
-                      <tr key={movement.id}>
-                        <td>{helpers.formatDate(movement.date)}</td>
-                        <td>{product ? product.name : `Product ${movement.productId}`}</td>
-                        <td>
-                          <span style={{
-                            color: movement.type === 'IN' ? '#2ecc71' : '#e74c3c',
-                            fontWeight: 'bold',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '5px'
-                          }}>
-                            {movement.type === 'IN' ? '📥 IN' : '📤 OUT'}
-                          </span>
-                        </td>
-                        <td>{movement.quantity}</td>
-                        <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
-                        <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
-                          {helpers.formatCurrency(movement.totalValue || 0)}
-                        </td>
-                        <td>{movement.reference || '-'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {/* Low Stock Alerts */}
+          {stats.lowStock > 0 && (
+            <div className="card">
+              <h3><span className="gradient-text">⚠️</span> Low Stock Alerts</h3>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Product</th>
+                      <th>Unit</th>
+                      <th>Current Stock</th>
+                      <th>Reorder Level</th>
+                      <th>Total Cost of Purchases (GH¢)</th>
+                      <th>Average Unit Cost (GH¢)</th>
+                      <th>Current Inventory Value (GH¢)</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {products
+                      .filter(product => {
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        return status === 'LOW';
+                      })
+                      .map(product => {
+                        const stock = helpers.getProductBalance(product.id, movements);
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        const costData = helpers.calculateProductCost(product.id, movements);
+                        
+                        return (
+                          <tr key={product.id}>
+                            <td><strong>{product.name}</strong></td>
+                            <td>{product.unit}</td>
+                            <td style={{ color: '#f39c12', fontWeight: 'bold' }}>{stock}</td>
+                            <td>{product.reorderLevel}</td>
+                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                            <td>{helpers.formatCurrency(costData.currentValue)}</td>
+                            <td>
+                              <span className="status-badge status-low">
+                                ⚠️ Low Stock
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       );
     }
     
     // ================= PRODUCTS COMPONENT =================
-    function Products({ products, movements, addProduct, updateProduct, deleteProduct, confirmDelete, user, helpers }) {
+    function Products({ products, movements, addProduct, updateProduct, deleteProduct, confirmDelete, user, helpers, showImportModal }) {
       const [newProduct, setNewProduct] = React.useState({
         name: '',
         unit: '',
@@ -3476,12 +3242,17 @@
       
       return (
         <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📦</span> Product Management ({products.length} products)</h3>
+          <h3><span className="gradient-text">📦</span> Product Management ({products.length} products)</h3>
           
           {/* Add Product Form */}
           {user.role === 'STOREKEEPER' && (
             <div className="filter-section">
-              <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Add New Product</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h4 style={{ color: '#1a237e' }}>Add New Product</h4>
+                <button className="btn btn-import" onClick={showImportModal}>
+                  <span>📥</span> Import Stock Data
+                </button>
+              </div>
               <div className="form-row">
                 <div className="form-group">
                   <input
@@ -3666,8 +3437,527 @@
       );
     }
     
+    // ================= STOCK IMPORT MODAL =================
+    function StockImportModal({ onImport, onCancel, importData, setImportData, importErrors, setImportErrors, products, helpers }) {
+      const fileInputRef = React.useRef(null);
+      
+      const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          readExcelFile(file);
+        }
+      };
+      
+      const readExcelFile = (file) => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            
+            const processedData = [];
+            const errors = [];
+            
+            jsonData.forEach((row, index) => {
+              const rowNumber = index + 2;
+              
+              if (!row['Product Name']) {
+                errors.push(`Row ${rowNumber}: Missing product name`);
+                return;
+              }
+              
+              const productName = row['Product Name'].toString().trim();
+              const unit = row['Unit'] || 'Piece';
+              const currentStock = parseInt(row['Current Stock'] || 0);
+              const reorderLevel = parseInt(row['Reorder Level'] || 0);
+              const averageUnitCost = parseFloat(row['Average Unit Cost (GH¢)'] || row['Average Unit Cost'] || 0);
+              
+              if (isNaN(currentStock) || currentStock < 0) {
+                errors.push(`Row ${rowNumber}: Invalid current stock`);
+                return;
+              }
+              
+              if (isNaN(reorderLevel) || reorderLevel < 0) {
+                errors.push(`Row ${rowNumber}: Invalid reorder level`);
+                return;
+              }
+              
+              if (isNaN(averageUnitCost) || averageUnitCost < 0) {
+                errors.push(`Row ${rowNumber}: Invalid average unit cost`);
+                return;
+              }
+              
+              // Check if product already exists
+              const existingProduct = products.find(p => 
+                p.name.toLowerCase() === productName.toLowerCase()
+              );
+              
+              if (existingProduct) {
+                errors.push(`Row ${rowNumber}: Product "${productName}" already exists`);
+                return;
+              }
+              
+              processedData.push({
+                productName,
+                unit,
+                currentStock,
+                reorderLevel,
+                averageUnitCost,
+                totalCost: (currentStock * averageUnitCost).toFixed(2),
+                currentValue: (currentStock * averageUnitCost).toFixed(2)
+              });
+            });
+            
+            setImportData(processedData);
+            setImportErrors(errors);
+            
+            if (processedData.length === 0 && errors.length > 0) {
+              alert('No valid data found in file. Please check the template format.');
+            }
+            
+          } catch (error) {
+            console.error("Error reading Excel file:", error);
+            alert('Error reading file. Please make sure it is a valid Excel file.');
+          }
+        };
+        
+        reader.readAsArrayBuffer(file);
+      };
+      
+      return (
+        <div className="modal-overlay">
+          <div className="modal" style={{ maxWidth: '900px' }}>
+            <h3><span className="gradient-text">📥</span> Import Stock Data</h3>
+            
+            <div className="import-section">
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <button 
+                  className="btn btn-import"
+                  onClick={() => fileInputRef.current.click()}
+                  style={{ padding: '20px 40px', fontSize: '18px' }}
+                >
+                  <span>📄</span> Select Excel File
+                </button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  accept=".xlsx,.xls"
+                  onChange={handleFileSelect}
+                />
+                
+                <p style={{ marginTop: '20px', color: '#666', fontSize: '14px' }}>
+                  Upload an Excel file with the following columns:<br/>
+                  <strong>Product Name, Unit, Current Stock, Reorder Level, Average Unit Cost (GH¢)</strong>
+                </p>
+              </div>
+              
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button 
+                  className="btn btn-download-template" 
+                  onClick={helpers.generateImportTemplate}
+                >
+                  <span>📋</span> Download Template
+                </button>
+              </div>
+            </div>
+            
+            {importData.length > 0 && (
+              <div className="import-preview">
+                <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Preview ({importData.length} products)</h4>
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Product Name</th>
+                        <th>Unit</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Average Unit Cost (GH¢)</th>
+                        <th>Current Value (GH¢)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {importData.slice(0, 10).map((item, index) => (
+                        <tr key={index}>
+                          <td>{item.productName}</td>
+                          <td>{item.unit}</td>
+                          <td>{item.currentStock}</td>
+                          <td>{item.reorderLevel}</td>
+                          <td>{helpers.formatCurrency(item.averageUnitCost)}</td>
+                          <td>{helpers.formatCurrency(item.currentStock * item.averageUnitCost)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+            
+            {importErrors.length > 0 && (
+              <div className="alert alert-warning">
+                <div>
+                  <strong>Found {importErrors.length} error(s):</strong>
+                  <ul style={{ marginTop: '5px', marginLeft: '20px', fontSize: '13px' }}>
+                    {importErrors.slice(0, 5).map((error, index) => (
+                      <li key={index}>{error}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px', justifyContent: 'center' }}>
+              <button 
+                onClick={() => onImport(importData)} 
+                className="btn btn-import"
+                disabled={importData.length === 0}
+                style={{ padding: '15px 30px', fontSize: '16px' }}
+              >
+                <span>📥</span> Import Stock Data
+              </button>
+              <button onClick={onCancel} className="btn" style={{ 
+                background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)',
+                padding: '15px 30px',
+                fontSize: '16px'
+              }}>
+                <span>↩️</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= REPORTS COMPONENT =================
+    function Reports({ products, movements, users, exportToExcel, exportToWord, helpers }) {
+      const [reportType, setReportType] = React.useState('stock');
+      const [stockFilters, setStockFilters] = React.useState({
+        statuses: ['IN_STOCK', 'LOW_STOCK', 'OUT_OF_STOCK'],
+        startDate: '',
+        endDate: ''
+      });
+      
+      const [transactionFilters, setTransactionFilters] = React.useState({
+        types: ['IN', 'OUT'],
+        startDate: '',
+        endDate: ''
+      });
+      
+      const toggleStockStatus = (status) => {
+        setStockFilters(prev => {
+          const newStatuses = prev.statuses.includes(status)
+            ? prev.statuses.filter(s => s !== status)
+            : [...prev.statuses, status];
+          return { ...prev, statuses: newStatuses };
+        });
+      };
+      
+      const toggleTransactionType = (type) => {
+        setTransactionFilters(prev => {
+          const newTypes = prev.types.includes(type)
+            ? prev.types.filter(t => t !== type)
+            : [...prev.types, type];
+          return { ...prev, types: newTypes };
+        });
+      };
+      
+      const getFilteredStockData = () => {
+        return products.filter(product => {
+          const status = helpers.getProductStatus(product.id, products, movements);
+          const statusMap = {
+            'OK': 'IN_STOCK',
+            'LOW': 'LOW_STOCK',
+            'OUT': 'OUT_OF_STOCK'
+          };
+          
+          return stockFilters.statuses.includes(statusMap[status]);
+        });
+      };
+      
+      const getFilteredTransactionData = () => {
+        return movements.filter(movement => {
+          // Filter by type
+          if (!transactionFilters.types.includes(movement.type)) {
+            return false;
+          }
+          
+          // Filter by date range
+          const movementDate = new Date(movement.date);
+          if (transactionFilters.startDate) {
+            const startDate = new Date(transactionFilters.startDate);
+            if (movementDate < startDate) return false;
+          }
+          
+          if (transactionFilters.endDate) {
+            const endDate = new Date(transactionFilters.endDate);
+            endDate.setHours(23, 59, 59, 999);
+            if (movementDate > endDate) return false;
+          }
+          
+          return true;
+        });
+      };
+      
+      const renderReportContent = () => {
+        const filteredStockData = getFilteredStockData();
+        const filteredTransactionData = getFilteredTransactionData();
+        
+        switch(reportType) {
+          case 'stock':
+            return (
+              <>
+                <div className="filter-section">
+                  <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Stock Report Filters</h4>
+                  
+                  <div className="multi-select-container">
+                    <div 
+                      className={`multi-select-option ${stockFilters.statuses.includes('IN_STOCK') ? 'selected' : ''}`}
+                      onClick={() => toggleStockStatus('IN_STOCK')}
+                    >
+                      <span className="checkmark">✓</span>
+                      <span>✓</span> In Stock
+                    </div>
+                    <div 
+                      className={`multi-select-option ${stockFilters.statuses.includes('LOW_STOCK') ? 'selected' : ''}`}
+                      onClick={() => toggleStockStatus('LOW_STOCK')}
+                    >
+                      <span className="checkmark">✓</span>
+                      <span>⚠️</span> Low Stock
+                    </div>
+                    <div 
+                      className={`multi-select-option ${stockFilters.statuses.includes('OUT_OF_STOCK') ? 'selected' : ''}`}
+                      onClick={() => toggleStockStatus('OUT_OF_STOCK')}
+                    >
+                      <span className="checkmark">✓</span>
+                      <span>🛑</span> Out of Stock
+                    </div>
+                  </div>
+                  
+                  <div className="date-range-filter">
+                    <div className="date-input-group">
+                      <label>Start Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={stockFilters.startDate}
+                        onChange={e => setStockFilters({...stockFilters, startDate: e.target.value})}
+                      />
+                    </div>
+                    <div className="date-input-group">
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={stockFilters.endDate}
+                        onChange={e => setStockFilters({...stockFilters, endDate: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="report-controls">
+                  <button 
+                    className="btn btn-export"
+                    onClick={() => exportToExcel('stock', filteredStockData)}
+                  >
+                    <span>📊</span> Export to Excel
+                  </button>
+                  <button 
+                    className="btn btn-print"
+                    onClick={() => exportToWord('stock', filteredStockData, 'Stock Report')}
+                  >
+                    <span>📝</span> Export to Word
+                  </button>
+                </div>
+                
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Product</th>
+                        <th>Unit</th>
+                        <th>Current Stock</th>
+                        <th>Reorder Level</th>
+                        <th>Total Cost of Purchases (GH¢)</th>
+                        <th>Average Unit Cost (GH¢)</th>
+                        <th>Current Inventory Value (GH¢)</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredStockData.map(product => {
+                        const stock = helpers.getProductBalance(product.id, movements);
+                        const status = helpers.getProductStatus(product.id, products, movements);
+                        const costData = helpers.calculateProductCost(product.id, movements);
+                        
+                        return (
+                          <tr key={product.id}>
+                            <td><strong>{product.name}</strong></td>
+                            <td>{product.unit}</td>
+                            <td style={{ fontWeight: 'bold' }}>{stock}</td>
+                            <td>{product.reorderLevel}</td>
+                            <td>{helpers.formatCurrency(costData.totalCost)}</td>
+                            <td>{helpers.formatCurrency(costData.averageUnitCost)}</td>
+                            <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
+                              {helpers.formatCurrency(costData.currentValue)}
+                            </td>
+                            <td>
+                              <span className={`status-badge status-${status.toLowerCase()}`}>
+                                {status === 'OUT' ? '🛑 Out of Stock' : 
+                                 status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            );
+            
+          case 'transactions':
+            return (
+              <>
+                <div className="filter-section">
+                  <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Transaction Report Filters</h4>
+                  
+                  <div className="multi-select-container">
+                    <div 
+                      className={`multi-select-option ${transactionFilters.types.includes('IN') ? 'selected' : ''}`}
+                      onClick={() => toggleTransactionType('IN')}
+                    >
+                      <span className="checkmark">✓</span>
+                      <span>📥</span> Receipts
+                    </div>
+                    <div 
+                      className={`multi-select-option ${transactionFilters.types.includes('OUT') ? 'selected' : ''}`}
+                      onClick={() => toggleTransactionType('OUT')}
+                    >
+                      <span className="checkmark">✓</span>
+                      <span>📤</span> Issues
+                    </div>
+                  </div>
+                  
+                  <div className="date-range-filter">
+                    <div className="date-input-group">
+                      <label>Start Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={transactionFilters.startDate}
+                        onChange={e => setTransactionFilters({...transactionFilters, startDate: e.target.value})}
+                      />
+                    </div>
+                    <div className="date-input-group">
+                      <label>End Date</label>
+                      <input
+                        type="date"
+                        className="form-control"
+                        value={transactionFilters.endDate}
+                        onChange={e => setTransactionFilters({...transactionFilters, endDate: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="report-controls">
+                  <button 
+                    className="btn btn-export"
+                    onClick={() => exportToExcel('transactions', filteredTransactionData)}
+                  >
+                    <span>📊</span> Export to Excel
+                  </button>
+                  <button 
+                    className="btn btn-print"
+                    onClick={() => exportToWord('transactions', filteredTransactionData, 'Transaction Report')}
+                  >
+                    <span>📝</span> Export to Word
+                  </button>
+                </div>
+                
+                <div className="table-container">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>Unit Cost (GH¢)</th>
+                        <th>Total Value (GH¢)</th>
+                        <th>Reference</th>
+                        <th>User</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredTransactionData.map(movement => {
+                        const product = products.find(p => p.id === movement.productId);
+                        const userObj = users.find(u => u.id === movement.userId);
+                        
+                        return (
+                          <tr key={movement.id}>
+                            <td>{helpers.formatDateShort(movement.date)}</td>
+                            <td>{product ? product.name : `Product ${movement.productId}`}</td>
+                            <td>
+                              <span style={{
+                                color: movement.type === 'IN' ? '#27ae60' : '#e74c3c',
+                                fontWeight: 'bold'
+                              }}>
+                                {movement.type === 'IN' ? 'Receipt' : 'Issue'}
+                              </span>
+                            </td>
+                            <td>{movement.quantity}</td>
+                            <td>{helpers.formatCurrency(movement.unitCost || 0)}</td>
+                            <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
+                              {helpers.formatCurrency(movement.totalValue || 0)}
+                            </td>
+                            <td>{movement.reference || '-'}</td>
+                            <td>{userObj ? userObj.name : `User ${movement.userId}`}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            );
+            
+          default:
+            return <div>Select a report type</div>;
+        }
+      };
+      
+      return (
+        <div className="card">
+          <h3><span className="gradient-text">📈</span> Reports</h3>
+          
+          <div className="report-type-selector">
+            <button 
+              className={`report-type-btn ${reportType === 'stock' ? 'active' : ''}`}
+              onClick={() => setReportType('stock')}
+            >
+              <span>📊</span> Stock Report
+            </button>
+            <button 
+              className={`report-type-btn ${reportType === 'transactions' ? 'active' : ''}`}
+              onClick={() => setReportType('transactions')}
+            >
+              <span>📋</span> Transaction Report
+            </button>
+          </div>
+          
+          {renderReportContent()}
+        </div>
+      );
+    }
+    
     // ================= TRANSACTIONS COMPONENT =================
-    function Transactions({ products, movements, addMovement, helpers, showImportModal, user }) {
+    function Transactions({ products, movements, addMovement, helpers, user }) {
       const [transaction, setTransaction] = React.useState({
         productId: '',
         type: 'IN',
@@ -3699,21 +3989,7 @@
       
       return (
         <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #9b59b6, #8e44ad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>💰</span> Stock Transactions</h3>
-          
-          {/* Import Button */}
-          <div style={{ marginBottom: '25px' }}>
-            <button className="btn btn-import" onClick={showImportModal}>
-              <span>📥</span> Import Stock Received Data
-            </button>
-            <button 
-              className="btn btn-download-template" 
-              onClick={helpers.generateImportTemplate}
-              style={{ marginLeft: '10px' }}
-            >
-              <span>📋</span> Download Import Template
-            </button>
-          </div>
+          <h3><span className="gradient-text">💰</span> Stock Transactions</h3>
           
           <div className="filter-section">
             <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>New Transaction</h4>
@@ -3868,7 +4144,7 @@
       
       return (
         <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #e67e22, #d35400)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📋</span> Transaction History ({filteredMovements.length} records)</h3>
+          <h3><span className="gradient-text">📋</span> Transaction History ({filteredMovements.length} records)</h3>
           
           <div className="filter-section">
             <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>Filter History</h4>
@@ -3993,570 +4269,6 @@
       );
     }
     
-    // ================= ENHANCED REPORTS COMPONENT =================
-    function EnhancedReports({ products, movements, users, exportToExcel, exportToWord, helpers }) {
-      const [reportType, setReportType] = React.useState('stock');
-      const [filters, setFilters] = React.useState({
-        status: [],
-        startDate: '',
-        endDate: ''
-      });
-      
-      const filterData = () => {
-        if (reportType === 'stock') {
-          let filteredProducts = [...products];
-          
-          // Filter by status
-          if (filters.status && filters.status.length > 0) {
-            filteredProducts = filteredProducts.filter(product => {
-              const status = helpers.getProductStatus(product.id, products, movements);
-              return filters.status.includes(status);
-            });
-          }
-          
-          // Filter by date range (based on last movement)
-          if (filters.startDate || filters.endDate) {
-            filteredProducts = filteredProducts.filter(product => {
-              const productMovements = movements.filter(m => m.productId === product.id);
-              if (productMovements.length === 0) return true;
-              
-              const lastMovementDate = new Date(productMovements[productMovements.length - 1].date);
-              
-              if (filters.startDate) {
-                const startDate = new Date(filters.startDate);
-                startDate.setHours(0, 0, 0, 0);
-                if (lastMovementDate < startDate) return false;
-              }
-              
-              if (filters.endDate) {
-                const endDate = new Date(filters.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                if (lastMovementDate > endDate) return false;
-              }
-              
-              return true;
-            });
-          }
-          
-          return filteredProducts.map(product => {
-            const stock = helpers.getProductBalance(product.id, movements);
-            const status = helpers.getProductStatus(product.id, products, movements);
-            const costData = helpers.calculateProductCost(product.id, movements);
-            
-            return {
-              ...product,
-              currentStock: stock,
-              status: status,
-              totalCost: costData.totalCost,
-              averageUnitCost: costData.averageUnitCost,
-              currentValue: costData.currentValue
-            };
-          });
-        } 
-        else if (reportType === 'transactions') {
-          let filteredMovements = [...movements];
-          
-          // Filter by date range
-          if (filters.startDate || filters.endDate) {
-            filteredMovements = filteredMovements.filter(movement => {
-              const movementDate = new Date(movement.date);
-              
-              if (filters.startDate) {
-                const startDate = new Date(filters.startDate);
-                startDate.setHours(0, 0, 0, 0);
-                if (movementDate < startDate) return false;
-              }
-              
-              if (filters.endDate) {
-                const endDate = new Date(filters.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                if (movementDate > endDate) return false;
-              }
-              
-              return true;
-            });
-          }
-          
-          // Filter by current stock status
-          if (filters.status && filters.status.length > 0) {
-            filteredMovements = filteredMovements.filter(movement => {
-              const product = products.find(p => p.id === movement.productId);
-              if (!product) return false;
-              
-              const currentStatus = helpers.getProductStatus(product.id, products, movements);
-              return filters.status.includes(currentStatus);
-            });
-          }
-          
-          return filteredMovements.map(movement => {
-            const product = products.find(p => p.id === movement.productId);
-            const user = users.find(u => u.id === movement.userId);
-            
-            return {
-              ...movement,
-              productName: product ? product.name : `Product ${movement.productId}`,
-              userName: user ? user.name : `User ${movement.userId}`
-            };
-          }).reverse();
-        }
-        
-        return [];
-      };
-      
-      const filteredData = filterData();
-      
-      const handleExportExcel = () => {
-        if (reportType === 'stock') {
-          const excelData = filteredData.map(item => ({
-            'Product ID': item.id,
-            'Product Name': item.name,
-            'Unit': item.unit,
-            'Current Stock': item.currentStock,
-            'Reorder Level': item.reorderLevel,
-            'Total Cost of Purchases (GH¢)': item.totalCost,
-            'Average Unit Cost (GH¢)': item.averageUnitCost,
-            'Current Inventory Value (GH¢)': item.currentValue,
-            'Status': item.status === 'OUT' ? 'Out of Stock' : item.status === 'LOW' ? 'Low Stock' : 'In Stock'
-          }));
-          exportToExcel('stock', excelData);
-        } else if (reportType === 'transactions') {
-          const excelData = filteredData.map(item => ({
-            'Date': helpers.formatDateShort(item.date),
-            'Product': item.productName,
-            'Type': item.type === 'IN' ? 'Receipt' : 'Issue',
-            'Quantity': item.quantity,
-            'Unit Cost (GH¢)': item.unitCost || 0,
-            'Total Value (GH¢)': item.totalValue || 0,
-            'Reference': item.reference || '-',
-            'User': item.userName || `User ${item.userId}`,
-            'Import Batch': item.importBatch || '-'
-          }));
-          exportToExcel('transactions', excelData);
-        }
-      };
-      
-      const handleExportWord = () => {
-        exportToWord(reportType, filteredData);
-      };
-      
-      return (
-        <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #e74c3c, #c0392b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📈</span> Advanced Reports</h3>
-          
-          <div className="report-type-selector">
-            <button 
-              className={`report-type-btn ${reportType === 'stock' ? 'active' : ''}`}
-              onClick={() => setReportType('stock')}
-            >
-              <span>📊</span> Stock Report
-            </button>
-            <button 
-              className={`report-type-btn ${reportType === 'transactions' ? 'active' : ''}`}
-              onClick={() => setReportType('transactions')}
-            >
-              <span>📋</span> Transaction Report
-            </button>
-          </div>
-          
-          <ReportFilters 
-            filters={filters}
-            setFilters={setFilters}
-            reportType={reportType}
-          />
-          
-          <div className="report-controls">
-            <button 
-              className="btn btn-export"
-              onClick={handleExportExcel}
-              disabled={filteredData.length === 0}
-            >
-              <span>📥</span> Export to Excel
-            </button>
-            <button 
-              className="btn btn-export-word"
-              onClick={handleExportWord}
-              disabled={filteredData.length === 0}
-            >
-              <span>📄</span> Export to Word
-            </button>
-          </div>
-          
-          <div style={{ marginBottom: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '10px' }}>
-            <strong>Results:</strong> {filteredData.length} records found
-            {filters.startDate && (
-              <span style={{ marginLeft: '20px' }}>
-                <strong>From:</strong> {new Date(filters.startDate).toLocaleDateString()}
-              </span>
-            )}
-            {filters.endDate && (
-              <span style={{ marginLeft: '20px' }}>
-                <strong>To:</strong> {new Date(filters.endDate).toLocaleDateString()}
-              </span>
-            )}
-            {filters.status.length > 0 && (
-              <span style={{ marginLeft: '20px' }}>
-                <strong>Status:</strong> {filters.status.join(', ')}
-              </span>
-            )}
-          </div>
-          
-          {renderReportContent(reportType, filteredData, helpers, products)}
-        </div>
-      );
-    }
-    
-    function renderReportContent(reportType, filteredData, helpers, products) {
-      switch(reportType) {
-        case 'stock':
-          return (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Unit</th>
-                    <th>Current Stock</th>
-                    <th>Reorder Level</th>
-                    <th>Total Cost of Purchases (GH¢)</th>
-                    <th>Average Unit Cost (GH¢)</th>
-                    <th>Current Inventory Value (GH¢)</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map(item => (
-                    <tr key={item.id}>
-                      <td><strong>{item.name}</strong></td>
-                      <td>{item.unit}</td>
-                      <td style={{ fontWeight: 'bold' }}>{item.currentStock}</td>
-                      <td>{item.reorderLevel}</td>
-                      <td>{helpers.formatCurrency(item.totalCost)}</td>
-                      <td>{helpers.formatCurrency(item.averageUnitCost)}</td>
-                      <td style={{ color: '#27ae60', fontWeight: 'bold' }}>
-                        {helpers.formatCurrency(item.currentValue)}
-                      </td>
-                      <td>
-                        <span className={`status-badge status-${item.status.toLowerCase()}`}>
-                          {item.status === 'OUT' ? '🛑 Out of Stock' : 
-                           item.status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-          
-        case 'transactions':
-          return (
-            <div className="table-container">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Product</th>
-                    <th>Type</th>
-                    <th>Quantity</th>
-                    <th>Unit Cost (GH¢)</th>
-                    <th>Total Value (GH¢)</th>
-                    <th>Reference</th>
-                    <th>User</th>
-                    <th>Import Batch</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map(item => (
-                    <tr key={item.id}>
-                      <td>{helpers.formatDateShort(item.date)}</td>
-                      <td>{item.productName}</td>
-                      <td>
-                        <span style={{
-                          color: item.type === 'IN' ? '#27ae60' : '#e74c3c',
-                          fontWeight: 'bold'
-                        }}>
-                          {item.type === 'IN' ? 'Receipt' : 'Issue'}
-                        </span>
-                      </td>
-                      <td>{item.quantity}</td>
-                      <td>{helpers.formatCurrency(item.unitCost || 0)}</td>
-                      <td style={{ fontWeight: 'bold', color: '#27ae60' }}>
-                        {helpers.formatCurrency(item.totalValue || 0)}
-                      </td>
-                      <td>{item.reference || '-'}</td>
-                      <td>{item.userName || `User ${item.userId}`}</td>
-                      <td>{item.importBatch || '-'}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          );
-          
-        default:
-          return <div>Select a report type</div>;
-      }
-    }
-    
-    // ================= IMPORT MODAL =================
-    function ImportModal({ onImport, onCancel, importData, setImportData, importErrors, setImportErrors, products, helpers }) {
-      const [isDragging, setIsDragging] = React.useState(false);
-      const fileInputRef = React.useRef(null);
-      
-      const handleFileSelect = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-          readExcelFile(file);
-        }
-      };
-      
-      const readExcelFile = (file) => {
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-          try {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-            
-            const processedData = [];
-            const errors = [];
-            
-            jsonData.forEach((row, index) => {
-              const rowNumber = index + 2;
-              
-              if (!row['Product Name']) {
-                errors.push(`Row ${rowNumber}: Missing product name`);
-                return;
-              }
-              
-              if (!row['Quantity'] || isNaN(parseInt(row['Quantity'])) || parseInt(row['Quantity']) <= 0) {
-                errors.push(`Row ${rowNumber}: Invalid quantity`);
-                return;
-              }
-              
-              const unitCost = row['Unit Cost (GH¢)'] || row['Unit Cost'];
-              if (!unitCost || isNaN(parseFloat(unitCost)) || parseFloat(unitCost) < 0) {
-                errors.push(`Row ${rowNumber}: Invalid unit cost`);
-                return;
-              }
-              
-              const product = products.find(p => 
-                p.name.toLowerCase() === row['Product Name'].toString().toLowerCase().trim()
-              );
-              
-              if (!product) {
-                errors.push(`Row ${rowNumber}: Product "${row['Product Name']}" not found in system`);
-                return;
-              }
-              
-              processedData.push({
-                productName: row['Product Name'].toString().trim(),
-                quantity: parseInt(row['Quantity']),
-                unitCost: parseFloat(unitCost),
-                reference: row['Reference'] || `IMPORT-${Date.now()}`,
-                date: row['Date'] ? new Date(row['Date']).toISOString() : new Date().toISOString()
-              });
-            });
-            
-            setImportData(processedData);
-            setImportErrors(errors);
-            
-            if (processedData.length === 0 && errors.length > 0) {
-              alert('No valid data found in file. Please check the template format.');
-            }
-            
-          } catch (error) {
-            console.error("Error reading Excel file:", error);
-            alert('Error reading file. Please make sure it is a valid Excel file.');
-          }
-        };
-        
-        reader.readAsArrayBuffer(file);
-      };
-      
-      return (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3><span style={{ background: 'linear-gradient(135deg, #3498db, #2980b9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>📥</span> Import Stock Received Data</h3>
-            
-            <div className="import-section">
-              <div style={{ textAlign: 'center' }}>
-                <button 
-                  className="btn btn-import"
-                  onClick={() => fileInputRef.current.click()}
-                >
-                  <span>📄</span> Select Excel File
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  accept=".xlsx,.xls"
-                  onChange={handleFileSelect}
-                />
-              </div>
-              
-              <div style={{ marginTop: '20px', textAlign: 'center' }}>
-                <button 
-                  className="btn btn-download-template" 
-                  onClick={helpers.generateImportTemplate}
-                >
-                  <span>📋</span> Download Template
-                </button>
-              </div>
-            </div>
-            
-            {importData.length > 0 && (
-              <div className="import-preview">
-                <h4 style={{ color: '#1a237e', marginBottom: '15px' }}>Preview ({importData.length} records)</h4>
-                <div className="table-container">
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Product Name</th>
-                        <th>Quantity</th>
-                        <th>Unit Cost (GH¢)</th>
-                        <th>Reference</th>
-                        <th>Total Value (GH¢)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {importData.slice(0, 10).map((item, index) => (
-                        <tr key={index}>
-                          <td>{item.productName}</td>
-                          <td>{item.quantity}</td>
-                          <td>{helpers.formatCurrency(item.unitCost)}</td>
-                          <td>{item.reference}</td>
-                          <td>{helpers.formatCurrency(item.quantity * item.unitCost)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-            
-            {importErrors.length > 0 && (
-              <div className="alert alert-warning">
-                <div>
-                  <strong>Found {importErrors.length} error(s):</strong>
-                  <ul style={{ marginTop: '5px', marginLeft: '20px', fontSize: '13px' }}>
-                    {importErrors.slice(0, 5).map((error, index) => (
-                      <li key={index}>{error}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-            
-            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
-              <button 
-                onClick={() => onImport(importData)} 
-                className="btn btn-import"
-                disabled={importData.length === 0}
-              >
-                <span>📥</span> Import Data
-              </button>
-              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
-                <span>↩️</span> Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
-    // ================= CHANGE PASSWORD MODAL =================
-    function ChangePasswordModal({ onChange, onCancel, data, setData, helpers }) {
-      const [validation, setValidation] = React.useState({ valid: true, message: '' });
-      
-      const handleNewPasswordChange = (e) => {
-        const newPassword = e.target.value;
-        setData({ ...data, newPassword });
-        
-        if (newPassword.length > 0) {
-          const validationResult = helpers.validatePassword(newPassword);
-          setValidation(validationResult);
-        } else {
-          setValidation({ valid: true, message: '' });
-        }
-      };
-      
-      return (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3><span style={{ background: 'linear-gradient(135deg, #7f8c8d, #34495e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>🔒</span> Change Password</h3>
-            
-            <div className="form-group">
-              <label>Current Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter current password"
-                value={data.currentPassword}
-                onChange={(e) => setData({ ...data, currentPassword: e.target.value })}
-                required
-              />
-            </div>
-            
-            <div className="form-group">
-              <label>New Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Enter new password"
-                value={data.newPassword}
-                onChange={handleNewPasswordChange}
-                required
-              />
-              {data.newPassword && (
-                <div style={{ 
-                  marginTop: '5px', 
-                  fontSize: '12px',
-                  color: validation.valid ? '#2ecc71' : '#e74c3c',
-                  fontWeight: '600'
-                }}>
-                  {validation.message}
-                </div>
-              )}
-            </div>
-            
-            <div className="form-group">
-              <label>Confirm New Password</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Confirm new password"
-                value={data.confirmPassword}
-                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
-                required
-              />
-              {data.confirmPassword && data.newPassword !== data.confirmPassword && (
-                <div style={{ marginTop: '5px', fontSize: '12px', color: '#e74c3c', fontWeight: '600' }}>
-                  Passwords do not match
-                </div>
-              )}
-            </div>
-            
-            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
-              <button 
-                onClick={onChange} 
-                className="btn"
-                disabled={!validation.valid || data.newPassword !== data.confirmPassword}
-              >
-                <span>💾</span> Change Password
-              </button>
-              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
-                <span>↩️</span> Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    
     // ================= USERS COMPONENT =================
     function Users({ users, helpers, loadData }) {
       const [showAddUserModal, setShowAddUserModal] = React.useState(false);
@@ -4606,7 +4318,7 @@
       
       return (
         <div className="card">
-          <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>👥</span> User Management</h3>
+          <h3><span className="gradient-text">👥</span> User Management</h3>
           
           <div style={{ marginBottom: '25px' }}>
             <button className="btn btn-add" onClick={() => setShowAddUserModal(true)}>
@@ -4653,7 +4365,7 @@
           {showAddUserModal && (
             <div className="modal-overlay">
               <div className="modal">
-                <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>👤</span> Add New User</h3>
+                <h3><span className="gradient-text">👤</span> Add New User</h3>
                 
                 <div className="form-group">
                   <label>Username *</label>
@@ -4724,7 +4436,7 @@
       return (
         <div className="modal-overlay">
           <div className="modal">
-            <h3><span style={{ background: 'linear-gradient(135deg, #f1c40f, #f39c12)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>⚠️</span> Confirm Delete</h3>
+            <h3><span className="gradient-text">⚠️</span> Confirm Delete</h3>
             <p>Are you sure you want to delete <strong style={{ color: '#e74c3c' }}>{product.name}</strong>?</p>
             <p style={{ color: '#e74c3c', marginTop: '15px', fontSize: '14px', fontWeight: '600' }}>
               ⚠️ Note: You cannot delete products that have transaction history.
@@ -4732,6 +4444,95 @@
             <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
               <button onClick={onConfirm} className="btn btn-delete">
                 <span>🗑️</span> Delete
+              </button>
+              <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
+                <span>↩️</span> Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // ================= CHANGE PASSWORD MODAL =================
+    function ChangePasswordModal({ onChange, onCancel, data, setData, helpers }) {
+      const [validation, setValidation] = React.useState({ valid: true, message: '' });
+      
+      const handleNewPasswordChange = (e) => {
+        const newPassword = e.target.value;
+        setData({ ...data, newPassword });
+        
+        if (newPassword.length > 0) {
+          const validationResult = helpers.validatePassword(newPassword);
+          setValidation(validationResult);
+        } else {
+          setValidation({ valid: true, message: '' });
+        }
+      };
+      
+      return (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3><span className="gradient-text">🔒</span> Change Password</h3>
+            
+            <div className="form-group">
+              <label>Current Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter current password"
+                value={data.currentPassword}
+                onChange={(e) => setData({ ...data, currentPassword: e.target.value })}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>New Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Enter new password"
+                value={data.newPassword}
+                onChange={handleNewPasswordChange}
+                required
+              />
+              {data.newPassword && (
+                <div style={{ 
+                  marginTop: '5px', 
+                  fontSize: '12px',
+                  color: validation.valid ? '#2ecc71' : '#e74c3c',
+                  fontWeight: '600'
+                }}>
+                  {validation.message}
+                </div>
+              )}
+            </div>
+            
+            <div className="form-group">
+              <label>Confirm New Password</label>
+              <input
+                type="password"
+                className="form-control"
+                placeholder="Confirm new password"
+                value={data.confirmPassword}
+                onChange={(e) => setData({ ...data, confirmPassword: e.target.value })}
+                required
+              />
+              {data.confirmPassword && data.newPassword !== data.confirmPassword && (
+                <div style={{ marginTop: '5px', fontSize: '12px', color: '#e74c3c', fontWeight: '600' }}>
+                  Passwords do not match
+                </div>
+              )}
+            </div>
+            
+            <div style={{ display: 'flex', gap: '10px', marginTop: '25px' }}>
+              <button 
+                onClick={onChange} 
+                className="btn"
+                disabled={!validation.valid || data.newPassword !== data.confirmPassword}
+              >
+                <span>💾</span> Change Password
               </button>
               <button onClick={onCancel} className="btn" style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}>
                 <span>↩️</span> Cancel

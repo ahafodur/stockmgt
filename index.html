@@ -1829,7 +1829,7 @@
           await db.users.bulkAdd([
             { 
               username: "storekeeper", 
-              password: "12345store", 
+              password: "Store123", 
               role: "STOREKEEPER", 
               name: "Store Manager" 
             },
@@ -2884,14 +2884,17 @@
               <form onSubmit={handleLogin}>
                 <div className="form-group">
                   <label>Username</label>
-                  <input
-                    type="text"
+                  <select
                     className="form-control"
-                    placeholder="Enter username"
                     value={loginData.username}
                     onChange={(e) => setLoginData({...loginData, username: e.target.value})}
                     required
-                  />
+                  >
+                    <option value="" disabled>Select username</option>
+                    {users.map(user => (
+                      <option key={user.id} value={user.username}>{user.username}</option>
+                    ))}
+                  </select>
                 </div>
                 
                 <div className="form-group">
@@ -2910,15 +2913,6 @@
                   <span>🔑</span> Login
                 </button>
               </form>
-              
-              <div style={{ marginTop: '25px', padding: '20px', background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)', borderRadius: '12px', border: '2px solid #e0e0e0' }}>
-                <h4 style={{ fontSize: '16px', color: '#1a237e', marginBottom: '15px', fontWeight: '600' }}>Demo Credentials:</h4>
-                <div style={{ fontSize: '14px', color: '#666' }}>
-                  <p style={{ marginBottom: '8px' }}><strong>Storekeeper:</strong> storekeeper / Store123</p>
-                  <p style={{ marginBottom: '8px' }}><strong>Supervisor:</strong> supervisor / Super123</p>
-                  <p style={{ marginBottom: '8px' }}><strong>Admin:</strong> admin / Admin123</p>
-                </div>
-              </div>
               
               <div style={{ marginTop: '20px', textAlign: 'center' }}>
                 <div className={`drive-status ${GoogleDriveManager.isSignedIn ? 'connected' : 'disconnected'}`}>

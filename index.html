@@ -3234,9 +3234,73 @@
         }
       };
       
+      // Fixed importStockData function – now works!
       const importStockData = async (importBatch) => {
-        // This function is kept for compatibility with existing import modal
-        // The new AddProductsRecordsModal handles its own saving
+        try {
+          if (!importBatch || importBatch.length === 0) {
+            showAlert('No valid data to import', 'error');
+            return;
+          }
+          
+          let successCount = 0;
+          let errorCount = 0;
+          
+          for (const item of importBatch) {
+            try {
+              // Check if product exists (should not, because we already filtered in modal, but double-check)
+              let existing = products.find(p => p.name.toLowerCase() === item.productName.toLowerCase());
+              if (existing) {
+                errorCount++;
+                continue;
+              }
+              
+              // Create new product
+              const productId = await db.products.add({
+                name: item.productName,
+                unit: item.unit,
+                reorderLevel: item.reorderLevel,
+                currentUnitCost: item.averageUnitCost,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+              });
+              
+              // Add initial stock movement
+              if (item.currentStock > 0) {
+                await db.movements.add({
+                  productId: productId,
+                  type: 'IN',
+                  quantity: item.currentStock,
+                  unitCost: item.averageUnitCost,
+                  reference: 'STOCK_IMPORT',
+                  date: new Date().toISOString(),
+                  userId: user?.id || null,
+                  totalValue: item.currentStock * item.averageUnitCost,
+                  importBatch: `IMPORT_${Date.now()}`
+                });
+              }
+              
+              successCount++;
+            } catch (err) {
+              console.error('Error importing item:', err);
+              errorCount++;
+            }
+          }
+          
+          await loadData();
+          
+          if (successCount > 0) {
+            showAlert(`Successfully imported ${successCount} products${errorCount > 0 ? `, ${errorCount} failed` : ''}`, 'success');
+            window.dispatchEvent(new CustomEvent('dataChanged'));
+            setShowImportModal(false);
+            setImportData([]);
+            setImportErrors([]);
+          } else {
+            showAlert('No products were imported. Please check your data format.', 'error');
+          }
+        } catch (error) {
+          console.error('Error importing stock data:', error);
+          showAlert('Error importing data', 'error');
+        }
       };
       
       const changePassword = async () => {
@@ -3629,7 +3693,7 @@
             />
           )}
           
-          {/* Import Modal (existing) */}
+          {/* Import Modal (existing) – now works! */}
           {showImportModal && (
             <StockImportModal
               onImport={importStockData}
@@ -3682,7 +3746,7 @@
       );
     }
     
-    // ================= DASHBOARD COMPONENT (modified to include stats cards) =================
+    // ================= DASHBOARD COMPONENT =================
     function Dashboard({ products, movements, stats, helpers }) {
       const recentProducts = products.slice(-10).reverse();
       
@@ -3690,7 +3754,7 @@
       
       return (
         <div>
-          {/* Stats Cards (keep them below charts) */}
+          {/* Stats Cards */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-icon">📦</div>
@@ -3846,7 +3910,7 @@
       );
     }
     
-    // ================= PRODUCTS COMPONENT (modified to include new button) =================
+    // ================= PRODUCTS COMPONENT =================
     function Products({ products, movements, addProduct, updateProduct, deleteProduct, confirmDelete, user, helpers, showImportModal, showAddProductsModal }) {
       const [newProduct, setNewProduct] = React.useState({
         name: '',
@@ -3892,7 +3956,7 @@
           <h3><span className="gradient-text">📦</span> Product Management ({products.length} products)</h3>
           
           {/* Add Product Form */}
-          {user.role === 'STOREKEEPER' && (
+          {(user.role === 'STOREKEEPER' || user.role === 'ADMIN') && (
             <div className="filter-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h4 style={{ color: '#1a237e' }}>Add New Product</h4>
@@ -3974,7 +4038,7 @@
                   <th>Average Unit Cost (GH¢)</th>
                   <th>Current Value (GH¢)</th>
                   <th>Status</th>
-                  {user.role === 'STOREKEEPER' && <th>Actions</th>}
+                  {(user.role === 'STOREKEEPER' || user.role === 'ADMIN') && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -4061,7 +4125,7 @@
                            status === 'LOW' ? '⚠️ Low Stock' : '✓ In Stock'}
                         </span>
                       </td>
-                      {user.role === 'STOREKEEPER' && (
+                      {(user.role === 'STOREKEEPER' || user.role === 'ADMIN') && (
                         <td>
                           <div className="action-buttons">
                             <button 
@@ -4089,7 +4153,7 @@
       );
     }
     
-    // ================= STOCK IMPORT MODAL (unchanged) =================
+    // ================= STOCK IMPORT MODAL =================
     function StockImportModal({ onImport, onCancel, importData, setImportData, importErrors, setImportErrors, products, helpers }) {
       const fileInputRef = React.useRef(null);
       

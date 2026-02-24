@@ -1995,6 +1995,7 @@ function BackupSync({ showAlert, onClose }) {
   });
   const [backups, setBackups] = React.useState([]);
   const [syncing, setSyncing] = React.useState(false);
+  const [importModal, setImportModal] = React.useState({ show: false, fileId: null, fileName: '' });
 
   React.useEffect(() => {
     initializeDrive();
@@ -2099,6 +2100,61 @@ function BackupSync({ showAlert, onClose }) {
     }
   };
 
+  // New function: Import from backup with options
+  const handleImport = async (fileId, fileName, mode) => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
+
+      const backupData = await GoogleDriveManager.restoreBackup(fileId);
+      if (!backupData || !backupData.data) {
+        throw new Error('Invalid backup file format');
+      }
+
+      if (mode === 'replace') {
+        // Replace all data
+        await db.products.clear();
+        await db.movements.clear();
+        await db.users.clear();
+        await db.backups.clear();
+
+        if (backupData.data.products) {
+          await db.products.bulkAdd(backupData.data.products);
+        }
+        if (backupData.data.movements) {
+          await db.movements.bulkAdd(backupData.data.movements);
+        }
+        if (backupData.data.users) {
+          await db.users.bulkAdd(backupData.data.users);
+        }
+
+        showAlert('✅ Data replaced successfully! Page will reload...', 'success');
+      } else {
+        // Merge: add missing records, update existing based on timestamp
+        const result = await GoogleDriveManager.syncData(backupData.data);
+        if (result.success) {
+          showAlert(`✅ Merge completed. Merged ${result.merged || 0} new/updated records.`, 'success');
+        } else {
+          throw new Error(result.error);
+        }
+      }
+
+      // Trigger data reload
+      window.dispatchEvent(new CustomEvent('dataChanged'));
+
+      // For replace, reload page after a short delay
+      if (mode === 'replace') {
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        setImportModal({ show: false, fileId: null, fileName: '' });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      showAlert(`❌ Import failed: ${error.message}`, 'error');
+    } finally {
+      setDriveStatus(prev => ({ ...prev, loading: false }));
+    }
+  };
+
   const handleSync = async () => {
     try {
       setSyncing(true);
@@ -2140,50 +2196,20 @@ function BackupSync({ showAlert, onClose }) {
     if (!window.confirm(`Are you sure you want to restore from backup:\n${filename}?\n\nThis will replace all local data.`)) {
       return;
     }
-
-    try {
-      setDriveStatus(prev => ({ ...prev, loading: true }));
-
-      const backupData = await GoogleDriveManager.restoreBackup(fileId);
-      if (!backupData || !backupData.data) {
-        throw new Error('Invalid backup file format');
-      }
-
-      await db.products.clear();
-      await db.movements.clear();
-      await db.users.clear();
-      await db.backups.clear();
-
-      if (backupData.data.products) {
-        await db.products.bulkAdd(backupData.data.products);
-      }
-      if (backupData.data.movements) {
-        await db.movements.bulkAdd(backupData.data.movements);
-      }
-      if (backupData.data.users) {
-        await db.users.bulkAdd(backupData.data.users);
-      }
-
-      showAlert('✅ Backup restored successfully! Page will reload...', 'success');
-      setTimeout(() => window.location.reload(), 2000);
-    } catch (error) {
-      console.error('Restore error:', error);
-      showAlert(`❌ Restore failed: ${error.message}`, 'error');
-    } finally {
-      setDriveStatus(prev => ({ ...prev, loading: false }));
-    }
+    // Call import with replace mode
+    await handleImport(fileId, filename, 'replace');
   };
 
   return (
     <div className="google-drive-section">
       <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>
-        <span className="gradient-text">☁️</span> Google Drive Backup & Sync
+        <span className="gradient-text">☁️</span> Google Drive Backup & Import
       </h4>
 
-      {/* 🔹 Multi‑user sync note */}
+      {/* Multi-user note */}
       <div className="info-box" style={{ marginBottom: '20px', background: '#e3f2fd', borderLeftColor: '#2196f3' }}>
-        <strong>💡 Multi‑User Sync:</strong> Create a backup and other users can restore it to sync data. 
-        All users must use the same Google account or share backup files manually.
+        <strong>💡 Multi‑User Sync:</strong> To share data between computers, create a backup on one, then on another computer use <strong>Import</strong> (choose replace or merge). 
+        Make sure all users have access to the same Google Drive account.
       </div>
 
       <div className={`google-status ${driveStatus.signedIn ? 'connected' : 'disconnected'}`}>
@@ -2214,7 +2240,7 @@ function BackupSync({ showAlert, onClose }) {
             <span>🔐</span> Sign in with Google
           </button>
           <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
-            Connect to Google Drive to enable automatic backups and synchronization across devices
+            Connect to Google Drive to enable backups and data import.
           </p>
         </div>
       ) : (
@@ -2233,7 +2259,7 @@ function BackupSync({ showAlert, onClose }) {
               onClick={handleSync}
               disabled={syncing || driveStatus.loading}
             >
-              <span>🔄</span> {syncing ? 'Syncing...' : 'Sync Now'}
+              <span>🔄</span> {syncing ? 'Syncing...' : 'Auto-Merge Sync'}
             </button>
 
             <button 
@@ -2271,7 +2297,14 @@ function BackupSync({ showAlert, onClose }) {
                               className="btn btn-edit"
                               style={{ padding: '6px 12px', fontSize: '13px' }}
                             >
-                              <span>📥</span> Restore
+                              <span>📥</span> Replace All
+                            </button>
+                            <button 
+                              onClick={() => handleImport(backup.id, backup.name, 'merge')}
+                              className="btn btn-transaction"
+                              style={{ padding: '6px 12px', fontSize: '13px' }}
+                            >
+                              <span>🔄</span> Merge
                             </button>
                           </div>
                         </td>
@@ -2280,6 +2313,10 @@ function BackupSync({ showAlert, onClose }) {
                   </tbody>
                 </table>
               </div>
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                <strong>Replace All</strong> – overwrites all local data with the backup.<br/>
+                <strong>Merge</strong> – adds new records and updates existing ones based on timestamps.
+              </p>
             </div>
           )}
         </div>
@@ -2296,8 +2333,7 @@ function BackupSync({ showAlert, onClose }) {
       </div>
     </div>
   );
-}
-    
+}    
     // ================= LOADING COMPONENT =================
     function LoadingScreen() {
       return (

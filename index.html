@@ -1991,353 +1991,382 @@
     }
     
     // ================= BACKUP & SYNC COMPONENT (UPDATED) =================
-    function BackupSync({ showAlert, onClose }) {
-      const [driveStatus, setDriveStatus] = React.useState({
+function BackupSync({ showAlert, onClose }) {
+  const [driveStatus, setDriveStatus] = React.useState({
+    initialized: false,
+    signedIn: false,
+    loading: false
+  });
+  const [backups, setBackups] = React.useState([]);
+  const [syncing, setSyncing] = React.useState(false);
+  const [importModal, setImportModal] = React.useState({ show: false, fileId: null, fileName: '' });
+
+  React.useEffect(() => {
+    initializeDrive();
+  }, []);
+
+  const initializeDrive = async () => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
+      const initialized = await GoogleDriveManager.init();
+
+      setDriveStatus({
+        initialized,
+        signedIn: GoogleDriveManager.isSignedIn,
+        loading: false
+      });
+
+      if (GoogleDriveManager.isSignedIn) {
+        loadBackups();
+      }
+    } catch (error) {
+      console.error('Drive initialization error:', error);
+      setDriveStatus({
         initialized: false,
         signedIn: false,
         loading: false
       });
-      const [backups, setBackups] = React.useState([]);
-      const [syncing, setSyncing] = React.useState(false);
-      const [importModal, setImportModal] = React.useState({ show: false, fileId: null, fileName: '' });
+    }
+  };
 
-      React.useEffect(() => {
-        initializeDrive();
-      }, []);
+  const handleSignIn = async () => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
+      const success = await GoogleDriveManager.signIn();
 
-      const initializeDrive = async () => {
-        try {
-          setDriveStatus(prev => ({ ...prev, loading: true }));
-          const initialized = await GoogleDriveManager.init();
-
-          setDriveStatus({
-            initialized,
-            signedIn: GoogleDriveManager.isSignedIn,
-            loading: false
-          });
-
-          if (GoogleDriveManager.isSignedIn) {
-            loadBackups();
-          }
-        } catch (error) {
-          console.error('Drive initialization error:', error);
-          setDriveStatus({
-            initialized: false,
-            signedIn: false,
-            loading: false
-          });
-        }
-      };
-
-      const handleSignIn = async () => {
-        try {
-          setDriveStatus(prev => ({ ...prev, loading: true }));
-          const success = await GoogleDriveManager.signIn();
-
-          if (success) {
-            setDriveStatus({
-              initialized: true,
-              signedIn: true,
-              loading: false
-            });
-            showAlert('Successfully connected to Google Drive', 'success');
-            loadBackups();
-          } else {
-            setDriveStatus(prev => ({ ...prev, loading: false }));
-            showAlert('Failed to connect to Google Drive', 'error');
-          }
-        } catch (error) {
-          console.error('Sign in error:', error);
-          setDriveStatus(prev => ({ ...prev, loading: false }));
-          showAlert('Error connecting to Google Drive', 'error');
-        }
-      };
-
-      const handleSignOut = () => {
-        GoogleDriveManager.signOut();
+      if (success) {
         setDriveStatus({
           initialized: true,
-          signedIn: false,
+          signedIn: true,
           loading: false
         });
-        setBackups([]);
-        showAlert('Disconnected from Google Drive', 'info');
+        showAlert('Successfully connected to Google Drive', 'success');
+        loadBackups();
+      } else {
+        setDriveStatus(prev => ({ ...prev, loading: false }));
+        showAlert('Failed to connect to Google Drive', 'error');
+      }
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setDriveStatus(prev => ({ ...prev, loading: false }));
+      showAlert('Error connecting to Google Drive', 'error');
+    }
+  };
+
+  const handleSignOut = () => {
+    GoogleDriveManager.signOut();
+    setDriveStatus({
+      initialized: true,
+      signedIn: false,
+      loading: false
+    });
+    setBackups([]);
+    showAlert('Disconnected from Google Drive', 'info');
+  };
+
+  const loadBackups = async () => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
+      const driveBackups = await GoogleDriveManager.listBackups();
+      setBackups(driveBackups);
+      showAlert(`Found ${driveBackups.length} backup(s)`, 'success');
+    } catch (error) {
+      console.error('Error loading backups:', error);
+      showAlert('Failed to load backups', 'error');
+    } finally {
+      setDriveStatus(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleBackup = async () => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
+
+      const data = {
+        products: await db.products.toArray(),
+        movements: await db.movements.toArray(),
+        users: await db.users.toArray()
       };
 
-      const loadBackups = async () => {
-        try {
-          setDriveStatus(prev => ({ ...prev, loading: true }));
-          const driveBackups = await GoogleDriveManager.listBackups();
-          setBackups(driveBackups);
-          showAlert(`Found ${driveBackups.length} backup(s)`, 'success');
-        } catch (error) {
-          console.error('Error loading backups:', error);
-          showAlert('Failed to load backups', 'error');
-        } finally {
-          setDriveStatus(prev => ({ ...prev, loading: false }));
+      const result = await GoogleDriveManager.createBackup(data);
+
+      if (result.success) {
+        showAlert(`✅ Backup created successfully: ${result.filename}`, 'success');
+        loadBackups(); // refresh list
+      } else {
+        showAlert(`❌ Backup failed: ${result.error}`, 'error');
+      }
+    } catch (error) {
+      console.error('Backup error:', error);
+      showAlert('Error creating backup', 'error');
+    } finally {
+      setDriveStatus(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  // 🔥 NEW: Import Google Data (Mirror) – replaces all local data with latest backup
+  const handleImportGoogleData = async () => {
+    try {
+      setSyncing(true);
+
+      const driveBackups = await GoogleDriveManager.listBackups();
+
+      if (driveBackups.length === 0) {
+        showAlert('No backups found. Create a backup first.', 'warning');
+        setSyncing(false);
+        return;
+      }
+
+      const latestBackup = driveBackups[0];
+
+      if (!window.confirm(
+        `Import latest Google backup?\n\n${latestBackup.name}\n\nThis will completely replace local data.`
+      )) {
+        setSyncing(false);
+        return;
+      }
+
+      showAlert(`Importing: ${latestBackup.name}`, 'info');
+
+      const backupData = await GoogleDriveManager.restoreBackup(latestBackup.id);
+
+      if (!backupData || !backupData.data) {
+        showAlert('Invalid backup file format', 'error');
+        setSyncing(false);
+        return;
+      }
+
+      // 🔥 FULL MIRROR MODE – clear all and insert backup
+      await db.transaction('rw', db.products, db.movements, db.users, async () => {
+        await db.products.clear();
+        await db.movements.clear();
+        await db.users.clear();
+
+        if (backupData.data.products?.length) {
+          await db.products.bulkAdd(backupData.data.products);
         }
-      };
 
-      const handleBackup = async () => {
-        try {
-          setDriveStatus(prev => ({ ...prev, loading: true }));
-
-          const data = {
-            products: await db.products.toArray(),
-            movements: await db.movements.toArray(),
-            users: await db.users.toArray()
-          };
-
-          const result = await GoogleDriveManager.createBackup(data);
-
-          if (result.success) {
-            showAlert(`✅ Backup created successfully: ${result.filename}`, 'success');
-            loadBackups(); // refresh list
-          } else {
-            showAlert(`❌ Backup failed: ${result.error}`, 'error');
-          }
-        } catch (error) {
-          console.error('Backup error:', error);
-          showAlert('Error creating backup', 'error');
-        } finally {
-          setDriveStatus(prev => ({ ...prev, loading: false }));
+        if (backupData.data.movements?.length) {
+          await db.movements.bulkAdd(backupData.data.movements);
         }
-      };
 
-      // New function: Import from backup with options
-      const handleImport = async (fileId, fileName, mode) => {
-        try {
-          setDriveStatus(prev => ({ ...prev, loading: true }));
-
-          const backupData = await GoogleDriveManager.restoreBackup(fileId);
-          if (!backupData || !backupData.data) {
-            throw new Error('Invalid backup file format');
-          }
-
-          if (mode === 'replace') {
-            // Replace all data
-            await db.products.clear();
-            await db.movements.clear();
-            await db.users.clear();
-            await db.backups.clear();
-
-            if (backupData.data.products) {
-              await db.products.bulkAdd(backupData.data.products);
-            }
-            if (backupData.data.movements) {
-              await db.movements.bulkAdd(backupData.data.movements);
-            }
-            if (backupData.data.users) {
-              await db.users.bulkAdd(backupData.data.users);
-            }
-
-            showAlert('✅ Data replaced successfully! Page will reload...', 'success');
-          } else {
-            // Merge: add missing records, update existing based on timestamp
-            const result = await GoogleDriveManager.syncData(backupData.data);
-            if (result.success) {
-              showAlert(`✅ Merge completed. Merged ${result.merged || 0} new/updated records.`, 'success');
-            } else {
-              throw new Error(result.error);
-            }
-          }
-
-          // Trigger data reload
-          window.dispatchEvent(new CustomEvent('dataChanged'));
-
-          // For replace, reload page after a short delay
-          if (mode === 'replace') {
-            setTimeout(() => window.location.reload(), 2000);
-          } else {
-            setImportModal({ show: false, fileId: null, fileName: '' });
-          }
-        } catch (error) {
-          console.error('Import error:', error);
-          showAlert(`❌ Import failed: ${error.message}`, 'error');
-        } finally {
-          setDriveStatus(prev => ({ ...prev, loading: false }));
+        if (backupData.data.users?.length) {
+          await db.users.bulkAdd(backupData.data.users);
         }
-      };
+      });
 
-      const handleSync = async () => {
-        try {
-          setSyncing(true);
+      showAlert('✅ Google data imported successfully! Reloading...', 'success');
 
-          const driveBackups = await GoogleDriveManager.listBackups();
-          if (driveBackups.length === 0) {
-            showAlert('No backups found. Create a backup first.', 'warning');
-            setSyncing(false);
-            return;
-          }
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
 
-          const latestBackup = driveBackups[0];
-          showAlert(`Syncing with: ${latestBackup.name}`, 'info');
+    } catch (error) {
+      console.error('Import Google Data error:', error);
+      showAlert('Error importing Google data', 'error');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
-          const backupData = await GoogleDriveManager.restoreBackup(latestBackup.id);
-          if (!backupData || !backupData.data) {
-            showAlert('Invalid backup file format', 'error');
-            setSyncing(false);
-            return;
-          }
+  // Existing import with options (for per-backup actions)
+  const handleImport = async (fileId, fileName, mode) => {
+    try {
+      setDriveStatus(prev => ({ ...prev, loading: true }));
 
-          const result = await GoogleDriveManager.syncData(backupData.data);
+      const backupData = await GoogleDriveManager.restoreBackup(fileId);
+      if (!backupData || !backupData.data) {
+        throw new Error('Invalid backup file format');
+      }
 
-          if (result.success) {
-            showAlert(`✅ Sync completed. Merged ${result.merged || 0} new records.`, 'success');
-            window.dispatchEvent(new CustomEvent('dataChanged'));
-          } else {
-            showAlert(`❌ Sync failed: ${result.error}`, 'error');
-          }
-        } catch (error) {
-          console.error('Sync error:', error);
-          showAlert('Error synchronizing data', 'error');
-        } finally {
-          setSyncing(false);
+      if (mode === 'replace') {
+        // Replace all data
+        await db.products.clear();
+        await db.movements.clear();
+        await db.users.clear();
+        await db.backups.clear();
+
+        if (backupData.data.products) {
+          await db.products.bulkAdd(backupData.data.products);
         }
-      };
-
-      const handleRestore = async (fileId, filename) => {
-        if (!window.confirm(`Are you sure you want to restore from backup:\n${filename}?\n\nThis will replace all local data.`)) {
-          return;
+        if (backupData.data.movements) {
+          await db.movements.bulkAdd(backupData.data.movements);
         }
-        // Call import with replace mode
-        await handleImport(fileId, filename, 'replace');
-      };
+        if (backupData.data.users) {
+          await db.users.bulkAdd(backupData.data.users);
+        }
 
-      return (
-        <div className="google-drive-section">
-          <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>
-            <span className="gradient-text">☁️</span> Google Drive Backup & Import
-          </h4>
+        showAlert('✅ Data replaced successfully! Page will reload...', 'success');
+      } else {
+        // Merge: add missing records, update existing based on timestamp
+        const result = await GoogleDriveManager.syncData(backupData.data);
+        if (result.success) {
+          showAlert(`✅ Merge completed. Merged ${result.merged || 0} new/updated records.`, 'success');
+        } else {
+          throw new Error(result.error);
+        }
+      }
 
-          {/* Multi-user note */}
-          <div className="info-box" style={{ marginBottom: '20px', background: '#e3f2fd', borderLeftColor: '#2196f3' }}>
-            <strong>💡 Multi‑User Sync:</strong> To share data between computers, create a backup on one, then on another computer use <strong>Import</strong> (choose replace or merge). 
-            Make sure all users have access to the same Google Drive account.
-          </div>
+      // Trigger data reload
+      window.dispatchEvent(new CustomEvent('dataChanged'));
 
-          <div className={`google-status ${driveStatus.signedIn ? 'connected' : 'disconnected'}`}>
-            <div style={{ 
-              width: '12px', 
-              height: '12px', 
-              borderRadius: '50%',
-              background: driveStatus.signedIn ? '#34a853' : '#ea4335',
-              boxShadow: `0 0 10px ${driveStatus.signedIn ? '#34a853' : '#ea4335'}`
-            }}></div>
-            <div>
-              <strong>Status:</strong> {driveStatus.signedIn ? 'Connected to Google Drive' : 'Not Connected'}
-            </div>
-          </div>
+      // For replace, reload page after a short delay
+      if (mode === 'replace') {
+        setTimeout(() => window.location.reload(), 2000);
+      } else {
+        setImportModal({ show: false, fileId: null, fileName: '' });
+      }
+    } catch (error) {
+      console.error('Import error:', error);
+      showAlert(`❌ Import failed: ${error.message}`, 'error');
+    } finally {
+      setDriveStatus(prev => ({ ...prev, loading: false }));
+    }
+  };
 
-          {!driveStatus.initialized || driveStatus.loading ? (
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <div className="loading-spinner" style={{ width: '30px', height: '30px', margin: '0 auto' }}></div>
-              <p style={{ marginTop: '10px', color: '#666' }}>Initializing Google Drive...</p>
-            </div>
-          ) : !driveStatus.signedIn ? (
-            <div style={{ textAlign: 'center' }}>
-              <button 
-                className="google-btn"
-                onClick={handleSignIn}
-                disabled={driveStatus.loading}
-              >
-                <span>🔐</span> Sign in with Google
-              </button>
-              <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
-                Connect to Google Drive to enable backups and data import.
-              </p>
-            </div>
-          ) : (
-            <div>
-              <div className="backup-controls">
-                <button 
-                  className="btn btn-add"
-                  onClick={handleBackup}
-                  disabled={driveStatus.loading}
-                >
-                  <span>💾</span> Create Backup
-                </button>
+  // Keep handleRestore as a shortcut for replace (used by per-backup buttons)
+  const handleRestore = async (fileId, filename) => {
+    if (!window.confirm(`Are you sure you want to restore from backup:\n${filename}?\n\nThis will replace all local data.`)) {
+      return;
+    }
+    await handleImport(fileId, filename, 'replace');
+  };
 
-                <button 
-                  className="btn btn-transaction"
-                  onClick={handleSync}
-                  disabled={syncing || driveStatus.loading}
-                >
-                  <span>🔄</span> {syncing ? 'Syncing...' : 'Auto-Merge Sync'}
-                </button>
+  return (
+    <div className="google-drive-section">
+      <h4 style={{ color: '#1a237e', marginBottom: '20px' }}>
+        <span className="gradient-text">☁️</span> Google Drive Backup & Import
+      </h4>
 
-                <button 
-                  className="btn btn-export"
-                  onClick={loadBackups}
-                  disabled={driveStatus.loading}
-                >
-                  <span>🔄</span> Refresh Backups
-                </button>
-              </div>
+      {/* Multi-user note */}
+      <div className="info-box" style={{ marginBottom: '20px', background: '#e3f2fd', borderLeftColor: '#2196f3' }}>
+        <strong>💡 Multi‑User Sync:</strong> To share data between computers, create a backup on one, then on another computer use <strong>Import Google Data</strong> (mirror) to completely replace local data with the latest backup. 
+        Make sure all users have access to the same Google Drive account.
+      </div>
 
-              {backups.length > 0 && (
-                <div className="backup-history">
-                  <h5 style={{ color: '#1a237e', marginBottom: '15px' }}>Available Backups:</h5>
-                  <div className="table-container">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Backup File</th>
-                          <th>Created</th>
-                          <th>Size</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {backups.slice(0, 10).map(backup => (
-                          <tr key={backup.id}>
-                            <td>{backup.name}</td>
-                            <td>{new Date(backup.createdTime).toLocaleString()}</td>
-                            <td>{backup.size ? `${(backup.size / 1024).toFixed(2)} KB` : 'Unknown'}</td>
-                            <td>
-                              <div className="action-buttons">
-                                <button 
-                                  onClick={() => handleRestore(backup.id, backup.name)}
-                                  className="btn btn-edit"
-                                  style={{ padding: '6px 12px', fontSize: '13px' }}
-                                >
-                                  <span>📥</span> Replace All
-                                </button>
-                                <button 
-                                  onClick={() => handleImport(backup.id, backup.name, 'merge')}
-                                  className="btn btn-transaction"
-                                  style={{ padding: '6px 12px', fontSize: '13px' }}
-                                >
-                                  <span>🔄</span> Merge
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-                    <strong>Replace All</strong> – overwrites all local data with the backup.<br/>
-                    <strong>Merge</strong> – adds new records and updates existing ones based on timestamps.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
+      <div className={`google-status ${driveStatus.signedIn ? 'connected' : 'disconnected'}`}>
+        <div style={{ 
+          width: '12px', 
+          height: '12px', 
+          borderRadius: '50%',
+          background: driveStatus.signedIn ? '#34a853' : '#ea4335',
+          boxShadow: `0 0 10px ${driveStatus.signedIn ? '#34a853' : '#ea4335'}`
+        }}></div>
+        <div>
+          <strong>Status:</strong> {driveStatus.signedIn ? 'Connected to Google Drive' : 'Not Connected'}
+        </div>
+      </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25px' }}>
+      {!driveStatus.initialized || driveStatus.loading ? (
+        <div style={{ textAlign: 'center', padding: '20px' }}>
+          <div className="loading-spinner" style={{ width: '30px', height: '30px', margin: '0 auto' }}></div>
+          <p style={{ marginTop: '10px', color: '#666' }}>Initializing Google Drive...</p>
+        </div>
+      ) : !driveStatus.signedIn ? (
+        <div style={{ textAlign: 'center' }}>
+          <button 
+            className="google-btn"
+            onClick={handleSignIn}
+            disabled={driveStatus.loading}
+          >
+            <span>🔐</span> Sign in with Google
+          </button>
+          <p style={{ marginTop: '15px', fontSize: '14px', color: '#666' }}>
+            Connect to Google Drive to enable backups and data import.
+          </p>
+        </div>
+      ) : (
+        <div>
+          <div className="backup-controls">
             <button 
-              onClick={onClose}
-              className="btn"
-              style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}
+              className="btn btn-add"
+              onClick={handleBackup}
+              disabled={driveStatus.loading}
             >
-              <span>↩️</span> Close
+              <span>💾</span> Create Backup
+            </button>
+
+            {/* 🔁 REPLACED: Import Google Data (Mirror) button */}
+            <button 
+              className="btn btn-transaction"
+              onClick={handleImportGoogleData}
+              disabled={syncing || driveStatus.loading}
+            >
+              <span>☁️</span> {syncing ? 'Importing...' : 'Import Google Data'}
+            </button>
+
+            <button 
+              className="btn btn-export"
+              onClick={loadBackups}
+              disabled={driveStatus.loading}
+            >
+              <span>🔄</span> Refresh Backups
             </button>
           </div>
+
+          {backups.length > 0 && (
+            <div className="backup-history">
+              <h5 style={{ color: '#1a237e', marginBottom: '15px' }}>Available Backups:</h5>
+              <div className="table-container">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Backup File</th>
+                      <th>Created</th>
+                      <th>Size</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {backups.slice(0, 10).map(backup => (
+                      <tr key={backup.id}>
+                        <td>{backup.name}</td>
+                        <td>{new Date(backup.createdTime).toLocaleString()}</td>
+                        <td>{backup.size ? `${(backup.size / 1024).toFixed(2)} KB` : 'Unknown'}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button 
+                              onClick={() => handleRestore(backup.id, backup.name)}
+                              className="btn btn-edit"
+                              style={{ padding: '6px 12px', fontSize: '13px' }}
+                            >
+                              <span>📥</span> Replace All
+                            </button>
+                            <button 
+                              onClick={() => handleImport(backup.id, backup.name, 'merge')}
+                              className="btn btn-transaction"
+                              style={{ padding: '6px 12px', fontSize: '13px' }}
+                            >
+                              <span>🔄</span> Merge
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+                <strong>Replace All</strong> – overwrites all local data with the backup.<br/>
+                <strong>Merge</strong> – adds new records and updates existing ones based on timestamps.
+              </p>
+            </div>
+          )}
         </div>
-      );
-    }
+      )}
+
+      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25px' }}>
+        <button 
+          onClick={onClose}
+          className="btn"
+          style={{ background: 'linear-gradient(135deg, #7f8c8d 0%, #34495e 100%)' }}
+        >
+          <span>↩️</span> Close
+        </button>
+      </div>
+    </div>
+  );
+}
     
     // ================= LOADING COMPONENT =================
     function LoadingScreen() {
